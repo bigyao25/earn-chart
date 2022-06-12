@@ -1,6 +1,6 @@
 <template>
-  <HistoricalProjectedChart :data="data" :width="350" :height="220" />
-  <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
+  <!-- <HistoricalProjectedChart :data="data" :width="350" :height="220" /> -->
+  <HistoricalProjectedChart :data="data" :width="1000" :height="600" />
 </template>
 
 <script>

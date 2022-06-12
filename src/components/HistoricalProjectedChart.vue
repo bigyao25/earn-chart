@@ -139,18 +139,18 @@ export default {
       // 中点
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date) - 20)
+        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 20)
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", xScale(this.data.today.date))
+        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-end", "url(#axisDot)");
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date))
+        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", xScale(this.data.today.date) + 20)
+        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 20)
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
@@ -159,7 +159,7 @@ export default {
       root
         .append("text")
         .text("Historical")
-        .attr("x", xScale(this.data.today.date) - 60)
+        .attr("x", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 60)
         .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
@@ -170,7 +170,7 @@ export default {
       root
         .append("text")
         .text("Projected")
-        .attr("x", xScale(this.data.today.date) + 8)
+        .attr("x", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 8)
         .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
         // .attr("text-anchor", "middle")
         .attr("filter", "url(#solid)")
@@ -184,31 +184,29 @@ export default {
       const dateMax = this.data.projected.slice(-1)[0].date;
       root
         .append("text")
-        .text(dateToday.format("MMM D, YYYY"))
-        .attr("x", (this.width - this.widthes.yTickeValueArea) / 2 + this.widthes.yTickeValueArea - 30)
-        .attr("y", this.height - this.widthes.axisDot)
-        .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        // .attr("font-weight", this.widthes.tickeValueFontWeightBold)
-        .attr("fill", this.colors.fontTickValue);
-      root
-        .append("text")
         .text(dateMin.format("MMM D, YYYY"))
         .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
         .attr("font-size", this.widthes.tickeValueFontSize)
-        // .attr("font-weight", this.widthes.tickeValueFontWeightBold)
+        .attr("fill", this.colors.fontTickValue);
+      root
+        .append("text")
+        .text(dateToday.format("MMM D, YYYY"))
+        .attr("x", this.widthes.yTickeValueArea + chartArea.size.width / 2)
+        .attr("y", this.height - this.widthes.axisDot)
+        .attr("font-family", "Mulish Bold")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTickValue);
       root
         .append("text")
         .text(dateMax.format("MMM D, YYYY"))
-        .attr("x", this.width - 75)
+        .attr("x", this.width)
         .attr("y", this.height - this.widthes.axisDot)
-        // .attr("text-anchor", "end")
+        .attr("text-anchor", "end")
         .attr("font-family", "Mulish Bold")
         .attr("font-size", this.widthes.tickeValueFontSize)
-        // .attr("font-weight", this.widthes.tickeValueFontWeightBold)
         .attr("fill", this.colors.fontTickValue);
 
       root = svg.append("g");
@@ -216,9 +214,9 @@ export default {
       // today line
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date))
+        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y1", yScale(Math.min(...yValues)))
-        .attr("x2", xScale(this.data.today.date))
+        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y2", yScale(Math.max(...yValues)))
         .attr("stroke", this.colors.axisLine)
         .attr("stroke-dasharray", "8,8")
@@ -227,7 +225,7 @@ export default {
       // today dot
       obj = root
         .append("circle")
-        .attr("cx", xScale(dayjs(this.data.today.date)))
+        .attr("cx", this.widthes.yTickeValueArea + xScale(dayjs(this.data.today.date)))
         // .attr("cy", yScale((Math.min(...yValues) + Math.max(...yValues)) / 2))// 必居中
         .attr("cy", yScale(this.data.today.value))
         .attr("r", 5)
