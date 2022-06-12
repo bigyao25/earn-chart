@@ -13,6 +13,7 @@
     "d3-shape": "^3.1.0",
     "d3-transition": "^3.0.1",
     "dayjs": "^1.11.3",
+    "decimal.js": "^10.3.1",
     "vue": "^3.2.25"
   },
   "devDependencies": {
