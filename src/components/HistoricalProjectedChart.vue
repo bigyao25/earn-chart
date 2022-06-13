@@ -9,7 +9,7 @@
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleBand, scaleLinear } from "d3-scale";
-import { line } from "d3-shape";
+import { line, curveLinear, curveBasis } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
 
@@ -40,6 +40,8 @@ export default {
         fontHistorical: "#55AA00",
         fontProjected: "#6884DC",
         lineHistorical: "#55AA00",
+        lineProjectedCurrent: "#6884DC",
+        lineProjectedPotential: "#6884DC",
         fontTip: "#2C2236",
       },
     };
@@ -63,10 +65,10 @@ export default {
       };
 
       const all = [...this.data.historical, this.data.today, ...this.data.projected];
-      const xDates = all.map(m => m.date);
-      const yValues = all.map(m => m.value);
+      const allDates = all.map(m => m.date);
+      const allValues = all.map(m => m.value);
       const xScale = scaleBand()
-        .domain(xDates)
+        .domain(allDates)
         .range([chartArea.bottomLeft.x, chartArea.bottomLeft.x + chartArea.size.width]);
       // console.log(this.makeTike(0, 159).toString());
       // console.log(this.makeTike(1, 1042).toString());
@@ -74,10 +76,12 @@ export default {
       // console.log(this.makeTike(1_044, 5_555).toString());
       // console.log(this.makeTike(3_452_321, 8_971_111).toString());
       // console.log(this.makeTike(2_321, 8_971_111).toString());
-      const yValueRange = this.makeTike(Math.min(...yValues), Math.max(...yValues));
+      const yValueRange = this.makeTike(Math.min(...allValues), Math.max(...allValues));
       const yScale = scaleLinear()
         .domain([yValueRange[0], yValueRange[2]])
         .range([chartArea.size.height, this.widthes.axisDot / 2]);
+      const xDates = allDates.map(m => xScale(m));
+      const yValues = allValues.map(m => yScale(m));
 
       const svg = select("#_chart");
       svg.selectAll("*").remove();
@@ -139,7 +143,7 @@ export default {
       // 中点
       root
         .append("line")
-        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 20)
+        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 65)
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
         .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
@@ -150,7 +154,7 @@ export default {
         .append("line")
         .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 20)
+        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 65)
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
@@ -211,13 +215,44 @@ export default {
 
       root = svg.append("g");
 
+      // historical
+      // const historicalChart = root.append("g");
+      // obj = historicalChart
+      //   .selectAll("p")
+      //   .data(yValues) // parses data, and runs below operations n times
+      //   .enter() // creates new data-bound element
+      //   .append("p") // append <p> tag for each datum
+      //   .text(d => d); // changes attribute's value
+      // console.log(this.data.historical);
+      const lineH = line()
+        // .defined(i => this.data.historical[i])
+        .x(d => xScale(dayjs(d.date)))
+        .y(d => yScale(d.value))
+        .curve(curveBasis);
+      root
+        .append("path")
+        .datum([...this.data.historical, this.data.today])
+        .attr("d", lineH)
+        .attr("stroke", this.colors.lineHistorical)
+        .attr("stroke-width", 3)
+        .attr("fill", "transparent");
+      root
+        .append("path")
+        .datum([this.data.today, ...this.data.projected])
+        .attr("d", lineH)
+        .attr("stroke", this.colors.lineProjectedCurrent)
+        .attr("stroke-width", 3)
+        .attr("fill", "transparent");
+
+      root = svg.append("g");
+
       // today line
       root
         .append("line")
         .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
-        .attr("y1", yScale(Math.min(...yValues)))
+        .attr("y1", yScale(Math.min(...allValues)))
         .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
-        .attr("y2", yScale(Math.max(...yValues)))
+        .attr("y2", yScale(Math.max(...allValues)))
         .attr("stroke", this.colors.axisLine)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
@@ -226,7 +261,7 @@ export default {
       obj = root
         .append("circle")
         .attr("cx", this.widthes.yTickeValueArea + xScale(dayjs(this.data.today.date)))
-        // .attr("cy", yScale((Math.min(...yValues) + Math.max(...yValues)) / 2))// 必居中
+        // .attr("cy", yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
         .attr("cy", yScale(this.data.today.value))
         .attr("r", 5)
         .attr("fill", this.colors.lineHistorical)
