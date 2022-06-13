@@ -2,14 +2,13 @@
   <div class="chart relative">
     <svg id="_chart" :height="height" :width="width"></svg>
   </div>
-  <button v-on:click="handleClick">fresh</button>
 </template>
 
 <script>
 import dayjs from "dayjs";
 import { select } from "d3-selection";
-import { scaleBand, scaleLinear } from "d3-scale";
-import { line, curveLinear, curveBasis } from "d3-shape";
+import { scaleUtc, scaleLinear } from "d3-scale";
+import { line, curveLinear, curveBasis, stack } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
 
@@ -44,19 +43,33 @@ export default {
         lineProjectedPotential: "#925BCA",
         fontTip: "#2C2236",
       },
+      historicalData: [...this.data.historical, this.data.today],
+      todayData: this.data.today,
+      projectedCurrentData: [this.data.today, ...this.data.projectedCurrent],
+      projectedPotentialData: [this.data.today, ...this.data.projectedPotential],
+      chartArea: {},
+      xScale: {},
+      yScale: {},
+      lineH: {},
     };
   },
-
-  computed: {},
 
   mounted() {
     this.init();
   },
 
+  computed: {
+    // historicalData: function () {
+    //   const { historical, today } = this.data;
+    //   console.log("historicalData changed.");
+    //   return [...this.data.historical, this.data.today];
+    // },
+  },
+
   methods: {
-    init() {
+    initScale() {
       // 曲线绘制的区域（不包括坐标系区域）
-      const chartArea = {
+      this.chartArea = {
         bottomLeft: { x: this.widthes.yTickeValueArea + this.widthes.axisDot, y: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot },
         size: {
           width: this.width - this.widthes.yTickeValueArea - this.widthes.axisDot - this.widthes.axisDot,
@@ -65,23 +78,19 @@ export default {
       };
 
       const all = [...this.data.historical, this.data.today, ...this.data.projectedPotential];
-      const allDates = all.map(m => m.date);
+      const allDates = all.map(m => dayjs(m.date).toDate());
       const allValues = all.map(m => m.value);
-      const xScale = scaleBand()
-        .domain(allDates)
-        .range([chartArea.bottomLeft.x, chartArea.bottomLeft.x + chartArea.size.width]);
-      // console.log(this.makeTike(0, 159).toString());
-      // console.log(this.makeTike(1, 1042).toString());
-      // console.log(this.makeTike(1, 2042).toString());
-      // console.log(this.makeTike(1_044, 5_555).toString());
-      // console.log(this.makeTike(3_452_321, 8_971_111).toString());
-      // console.log(this.makeTike(2_321, 8_971_111).toString());
+      this.xScale = scaleUtc()
+        .domain([allDates[0], allDates[allDates.length - 1]])
+        .range([this.chartArea.bottomLeft.x, this.chartArea.bottomLeft.x + this.chartArea.size.width]);
+
       const yValueRange = this.makeTike(Math.min(...allValues), Math.max(...allValues));
-      const yScale = scaleLinear()
+      this.yScale = scaleLinear()
         .domain([yValueRange[0], yValueRange[2]])
-        .range([chartArea.size.height, this.widthes.axisDot / 2]);
-      const xDates = allDates.map(m => xScale(m));
-      const yValues = allValues.map(m => yScale(m));
+        .range([this.chartArea.size.height, this.widthes.axisDot / 2]);
+    },
+    init() {
+      this.initScale();
 
       const svg = select("#_chart");
       svg.selectAll("*").remove();
@@ -116,10 +125,10 @@ export default {
       root = svg.append("g");
       root
         .append("line")
-        .attr("x1", chartArea.bottomLeft.x + chartArea.size.width)
+        .attr("x1", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y1", this.widthes.axisDot)
-        .attr("x2", chartArea.bottomLeft.x + chartArea.size.width)
-        .attr("y2", chartArea.size.height + this.widthes.axisDot)
+        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+        .attr("y2", this.chartArea.size.height + this.widthes.axisDot)
         // .attr("y2", this.height - this.widthes.axisDot - this.widthes.xTickeValueArea)
         // .attr("width", 4)
         .attr("stroke", this.colors.axisLine)
@@ -132,10 +141,10 @@ export default {
       // 轴线
       root
         .append("line")
-        .attr("x1", this.widthes.yTickeValueArea + this.widthes.axisDot)
-        .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", chartArea.bottomLeft.x + chartArea.size.width)
-        .attr("y2", this.widthes.axisDot + chartArea.size.height)
+        .attr("x1", this.chartArea.bottomLeft.x)
+        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
         // .attr("width", 40)
         .attr("stroke", this.colors.axisLine)
         .attr("marker-end", "url(#axisDot)")
@@ -143,19 +152,19 @@ export default {
       // 中点
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date) - 65)
-        .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", xScale(this.data.today.date))
-        .attr("y2", this.widthes.axisDot + chartArea.size.height)
+        .attr("x1", this.xScale(this.data.today.date) - 65)
+        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.xScale(this.data.today.date))
+        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-end", "url(#axisDot)");
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date))
-        .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", xScale(this.data.today.date) + 65)
-        .attr("y2", this.widthes.axisDot + chartArea.size.height)
+        .attr("x1", this.xScale(this.data.today.date))
+        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.xScale(this.data.today.date) + 65)
+        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-start", "url(#axisDot)");
@@ -163,8 +172,8 @@ export default {
       root
         .append("text")
         .text("Historical")
-        .attr("x", xScale(this.data.today.date) - 60)
-        .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
+        .attr("x", this.xScale(this.data.today.date) - 60)
+        .attr("y", this.widthes.axisDot + this.chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
         .attr("font-size", this.widthes.tickeValueFontSize)
@@ -174,8 +183,8 @@ export default {
       root
         .append("text")
         .text("Projected")
-        .attr("x", xScale(this.data.today.date) + 8)
-        .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
+        .attr("x", this.xScale(this.data.today.date) + 8)
+        .attr("y", this.widthes.axisDot + this.chartArea.size.height + 4)
         // .attr("text-anchor", "middle")
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
@@ -197,7 +206,7 @@ export default {
       root
         .append("text")
         .text(dateToday.format("MMM D, YYYY"))
-        .attr("x", this.widthes.yTickeValueArea + chartArea.size.width / 2)
+        .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
         .attr("font-size", this.widthes.tickeValueFontSize)
@@ -213,6 +222,7 @@ export default {
         .attr("font-size", this.widthes.tickeValueFontSize)
         .attr("fill", this.colors.fontTickValue);
 
+      // 曲线
       root = svg.append("g");
 
       // historical
@@ -223,43 +233,47 @@ export default {
       //   .enter() // creates new data-bound element
       //   .append("p") // append <p> tag for each datum
       //   .text(d => d); // changes attribute's value
-      // console.log(this.data.historical);
-      const lineH = line()
-        // .defined(i => this.data.historical[i])
-        .x(d => xScale(dayjs(d.date)))
-        .y(d => yScale(d.value))
+      this.lineH = line()
+        .x(d => this.xScale(dayjs(d.date)))
+        .y(d => this.yScale(d.value))
         .curve(curveBasis);
+      // historical
       root
         .append("path")
-        .datum([...this.data.historical, this.data.today])
-        .attr("d", lineH)
+        .datum(this.historicalData)
+        // .transition()
+        .attr("id", "chartH")
+        .attr("d", this.lineH)
         .attr("stroke", this.colors.lineHistorical)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
+      // projectedCurrent
       root
         .append("path")
-        .datum([this.data.today, ...this.data.projectedCurrent])
-        .attr("d", lineH)
+        .datum(this.projectedCurrentData)
+        .attr("id", "chartPC")
+        .attr("d", this.lineH)
         .attr("stroke", this.colors.lineProjectedCurrent)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
+      // projectedPotential
       root
         .append("path")
-        .datum([this.data.today, ...this.data.projectedPotential])
-        .attr("d", lineH)
+        .datum(this.projectedPotentialData)
+        .attr("id", "chartPP")
+        .attr("d", this.lineH)
         .attr("stroke", this.colors.lineProjectedPotential)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
 
-      root = svg.append("g");
-
       // today line
+      root = svg.append("g");
       root
         .append("line")
-        .attr("x1", xScale(this.data.today.date))
-        .attr("y1", yScale(Math.min(...allValues)))
-        .attr("x2", xScale(this.data.today.date))
-        .attr("y2", yScale(Math.max(...allValues)))
+        .attr("x1", this.xScale(this.data.today.date))
+        .attr("y1", this.widthes.axisDot)
+        .attr("x2", this.xScale(this.data.today.date))
+        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
         .attr("stroke", this.colors.axisLine)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
@@ -267,9 +281,10 @@ export default {
       // today dot
       obj = root
         .append("circle")
-        .attr("cx", xScale(dayjs(this.data.today.date)))
-        // .attr("cy", yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
-        .attr("cy", yScale(this.data.today.value))
+        .attr("id", "today-dot")
+        .attr("cx", this.xScale(dayjs(this.data.today.date)))
+        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
+        .attr("cy", this.yScale(this.data.today.value))
         .attr("r", 5)
         .attr("fill", this.colors.lineHistorical)
         .attr("stroke", "#FFFFFF")
@@ -351,9 +366,6 @@ export default {
         .attr("fill", this.colors.fontTip);
     },
 
-    handleClick() {
-      this.init();
-    },
     // intlFormat(num) {
     //   return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
     // },
@@ -390,6 +402,34 @@ export default {
       const fixedMid = this.makeFrandly(Decimal.add(max, min).dividedBy(2), true);
 
       return [fixedMin, fixedMid, fixedMax];
+    },
+  },
+
+  watch: {
+    data: function (n, o) {
+      // this.init();
+      console.log("data changed.");
+      this.historicalData = [...this.data.historical, this.data.today];
+      this.todayData = this.data.today;
+      this.projectedCurrentData = [this.data.today, ...this.data.projectedCurrent];
+      this.projectedPotentialData = [this.data.today, ...this.data.projectedPotential];
+
+      this.initScale();
+
+      // today dot
+      select("#today-dot")
+        .transition()
+        .attr("cx", this.xScale(dayjs(this.data.today.date)))
+        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
+        .attr("cy", this.yScale(this.data.today.value))
+        .attr("data-date", this.data.today.date)
+        .attr("data-value", this.data.today.value);
+      // historical
+      select("#chartH").datum(this.historicalData).transition().attr("d", this.lineH);
+      // projectedCurrent
+      select("#chartPC").datum(this.projectedCurrentData).transition().attr("d", this.lineH);
+      // projectedPotential
+      select("#chartPP").datum(this.projectedPotentialData).transition().attr("d", this.lineH);
     },
   },
 };
