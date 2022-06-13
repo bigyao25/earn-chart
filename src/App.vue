@@ -23,7 +23,7 @@ export default {
           { date: dayjs("2022-06-07"), value: 95 },
         ],
         today: { date: dayjs("2022-06-08"), value: 100 },
-        projected: [
+        projectedCurrent: [
           { date: dayjs("2022-06-09"), value: 115 },
           { date: dayjs("2022-06-10"), value: 125 },
           { date: dayjs("2022-06-11"), value: 135 },
@@ -31,6 +31,15 @@ export default {
           { date: dayjs("2022-06-13"), value: 165 },
           { date: dayjs("2022-06-14"), value: 175 },
           { date: dayjs("2022-06-15"), value: 195 },
+        ],
+        projectedPotential: [
+          { date: dayjs("2022-06-09"), value: 135 },
+          { date: dayjs("2022-06-10"), value: 145 },
+          { date: dayjs("2022-06-11"), value: 165 },
+          { date: dayjs("2022-06-12"), value: 185 },
+          { date: dayjs("2022-06-13"), value: 195 },
+          { date: dayjs("2022-06-14"), value: 215 },
+          { date: dayjs("2022-06-15"), value: 245 },
         ],
       },
     };

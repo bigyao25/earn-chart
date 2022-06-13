@@ -41,7 +41,7 @@ export default {
         fontProjected: "#6884DC",
         lineHistorical: "#55AA00",
         lineProjectedCurrent: "#6884DC",
-        lineProjectedPotential: "#6884DC",
+        lineProjectedPotential: "#925BCA",
         fontTip: "#2C2236",
       },
     };
@@ -64,7 +64,7 @@ export default {
         },
       };
 
-      const all = [...this.data.historical, this.data.today, ...this.data.projected];
+      const all = [...this.data.historical, this.data.today, ...this.data.projectedPotential];
       const allDates = all.map(m => m.date);
       const allValues = all.map(m => m.value);
       const xScale = scaleBand()
@@ -143,18 +143,18 @@ export default {
       // 中点
       root
         .append("line")
-        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 65)
+        .attr("x1", xScale(this.data.today.date) - 65)
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
+        .attr("x2", xScale(this.data.today.date))
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-end", "url(#axisDot)");
       root
         .append("line")
-        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
+        .attr("x1", xScale(this.data.today.date))
         .attr("y1", this.widthes.axisDot + chartArea.size.height)
-        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 65)
+        .attr("x2", xScale(this.data.today.date) + 65)
         .attr("y2", this.widthes.axisDot + chartArea.size.height)
         .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
@@ -163,7 +163,7 @@ export default {
       root
         .append("text")
         .text("Historical")
-        .attr("x", this.widthes.yTickeValueArea + xScale(this.data.today.date) - 60)
+        .attr("x", xScale(this.data.today.date) - 60)
         .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
@@ -174,7 +174,7 @@ export default {
       root
         .append("text")
         .text("Projected")
-        .attr("x", this.widthes.yTickeValueArea + xScale(this.data.today.date) + 8)
+        .attr("x", xScale(this.data.today.date) + 8)
         .attr("y", this.widthes.axisDot + chartArea.size.height + 4)
         // .attr("text-anchor", "middle")
         .attr("filter", "url(#solid)")
@@ -185,7 +185,7 @@ export default {
       // 标尺文字
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
-      const dateMax = this.data.projected.slice(-1)[0].date;
+      const dateMax = this.data.projectedPotential.slice(-1)[0].date;
       root
         .append("text")
         .text(dateMin.format("MMM D, YYYY"))
@@ -238,9 +238,16 @@ export default {
         .attr("fill", "transparent");
       root
         .append("path")
-        .datum([this.data.today, ...this.data.projected])
+        .datum([this.data.today, ...this.data.projectedCurrent])
         .attr("d", lineH)
         .attr("stroke", this.colors.lineProjectedCurrent)
+        .attr("stroke-width", 3)
+        .attr("fill", "transparent");
+      root
+        .append("path")
+        .datum([this.data.today, ...this.data.projectedPotential])
+        .attr("d", lineH)
+        .attr("stroke", this.colors.lineProjectedPotential)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
 
@@ -249,9 +256,9 @@ export default {
       // today line
       root
         .append("line")
-        .attr("x1", this.widthes.yTickeValueArea + xScale(this.data.today.date))
+        .attr("x1", xScale(this.data.today.date))
         .attr("y1", yScale(Math.min(...allValues)))
-        .attr("x2", this.widthes.yTickeValueArea + xScale(this.data.today.date))
+        .attr("x2", xScale(this.data.today.date))
         .attr("y2", yScale(Math.max(...allValues)))
         .attr("stroke", this.colors.axisLine)
         .attr("stroke-dasharray", "8,8")
@@ -260,7 +267,7 @@ export default {
       // today dot
       obj = root
         .append("circle")
-        .attr("cx", this.widthes.yTickeValueArea + xScale(dayjs(this.data.today.date)))
+        .attr("cx", xScale(dayjs(this.data.today.date)))
         // .attr("cy", yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
         .attr("cy", yScale(this.data.today.value))
         .attr("r", 5)
