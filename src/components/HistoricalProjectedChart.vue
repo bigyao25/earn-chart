@@ -438,6 +438,6 @@ export default {
 <style lang="less" scoped>
 .chart {
   display: inline-block;
-  border: 1px solid lightpink;
+  // border: 1px solid lightpink;
 }
 </style>

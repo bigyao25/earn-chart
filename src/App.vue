@@ -1,8 +1,10 @@
 <template>
-  <HistoricalProjectedChart :data="this.choose === 1 ? data1 : data2" :width="400" :height="220" />
-  <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
+  <div>
+    <HistoricalProjectedChart :data="this.choose === 1 ? data1 : data2" :width="400" :height="220" />
+    <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
-  <button v-on:click="handleClick">change data</button>
+    <button v-on:click="handleClick">change data</button>
+  </div>
 </template>
 
 <script>
@@ -128,5 +130,14 @@ export default {
   font-weight: normal;
   font-display: swap;
   src: url(/fonts/mulish-v7-latin-700.woff?t=1641532682023) format("woff"), url(./fonts/mulish-v7-latin-700.woff2?t=1641532682023) format("woff2");
+}
+
+div {
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  width: 100px;
 }
 </style>
