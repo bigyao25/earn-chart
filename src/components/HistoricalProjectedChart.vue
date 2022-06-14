@@ -5,10 +5,13 @@
 </template>
 
 <script>
+/**
+ * TODO：黑夜模式
+ */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleUtc, scaleLinear } from "d3-scale";
-import { line, curveLinear, curveBasis, stack } from "d3-shape";
+import { line, curveLinear, curveBasis, stack, area } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
 
@@ -51,6 +54,8 @@ export default {
       xScale: {},
       yScale: {},
       lineH: {},
+      stackData: [],
+      series: {},
     };
   },
 
@@ -88,7 +93,29 @@ export default {
       this.yScale = scaleLinear()
         .domain([yValueRange[0], yValueRange[2]])
         .range([this.chartArea.size.height, this.widthes.axisDot / 2]);
+
+      this.stackData = [
+        ...this.data.historical.map(m => ({ date: m.date, historical: m.value })),
+        { date: this.data.today.date, today: this.data.today.value },
+        ...this.projectedCurrentData.map(m => ({
+          date: m.date,
+          projectedCurrent: m.value,
+          projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
+        })),
+      ].map(m => {
+        const item = { ...m, baseline: 0 };
+        if (!item.historical) item.historical = item.baseline;
+        if (!item.today) item.today = item.historical;
+        if (!item.projectedCurrent) item.projectedCurrent = item.today;
+        if (!item.projectedPotential) item.projectedPotential = item.projectedCurrent;
+        return item;
+      });
+      this.stackData.forEach(m => console.log("stackData", JSON.stringify(m)));
+
+      const myStack = stack().keys(["baseline", "historical", "today", "projectedCurrent", "projectedPotential"]);
+      this.series = myStack(this.stackData);
     },
+
     init() {
       this.initScale();
 
@@ -99,9 +126,7 @@ export default {
       var root;
       var obj;
 
-      /**
-       * defs
-       */
+      //#region defs
       // 坐标轴圆点
       var arrowMarker = defs
         .append("marker")
@@ -119,8 +144,11 @@ export default {
       whiteFilter.append("feFlood").attr("flood-color", this.colors.background);
       whiteFilter.append("feComposite").attr("in", "SourceGraphic").attr("operator", "atop");
 
+      //#endregion
+
+      //#region 坐标轴
       /**
-       * y坐标轴
+       * y
        */
       root = svg.append("g");
       root
@@ -136,7 +164,7 @@ export default {
         .attr("marker-start", "url(#axisDot)");
 
       /**
-       * x坐标轴
+       * x
        */
       // 轴线
       root
@@ -221,8 +249,9 @@ export default {
         .attr("font-family", "Mulish Bold")
         .attr("font-size", this.widthes.tickeValueFontSize)
         .attr("fill", this.colors.fontTickValue);
+      //#endregion
 
-      // 曲线
+      //#region 曲线
       root = svg.append("g");
 
       // historical
@@ -265,8 +294,10 @@ export default {
         .attr("stroke", this.colors.lineProjectedPotential)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
+      //#endregion
 
-      // today line
+      //#region today
+      // line
       root = svg.append("g");
       root
         .append("line")
@@ -278,7 +309,7 @@ export default {
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
 
-      // today dot
+      // dot
       obj = root
         .append("circle")
         .attr("id", "today-dot")
@@ -301,8 +332,36 @@ export default {
       obj.on("mouseout", function (d) {
         var tip = select("#tip");
         tip.transition().duration(300).remove();
-        console.log(tip);
       });
+      //#endregion
+
+      //#region area
+      root = svg.append("g");
+
+      const myArea = area()
+        .x(d => {
+          return this.xScale(dayjs(d.data.date));
+        })
+        .y0(d => {
+          // console.log("y0", d);
+          return this.yScale(d[0]);
+        })
+        .y1(d => {
+          // console.log("y1", d);
+          return this.yScale(d[1]);
+        });
+      const colorArray = ["#38CCCB", "#0074D9", "#2FCC40", "#FEDC00", "#FF4036"];
+
+      // console.log("series", this.series);
+      root
+        // .append("g")
+        .selectAll("path")
+        .data(this.series)
+        .enter()
+        .append("path")
+        .attr("d", myArea)
+        .attr("fill", (d, i) => colorArray[i % colorArray.length]);
+      //#endregion
     },
 
     drawTip(obj, root, size, date, value) {
@@ -333,7 +392,7 @@ export default {
 
       const tipDate = self.attr("data-date");
       const tipValue = self.attr("data-value");
-      console.log(dayjs(tipDate).format("MMM D"));
+      // console.log(dayjs(tipDate).format("MMM D"));
 
       tip
         .append("text")
