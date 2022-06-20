@@ -293,16 +293,12 @@ export default {
       //#endregion
 
       //#region area
+
+      // left
       this.leftArea = area()
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
         .y1(d => this.yScale(d[1] - d[0]));
-
-      // left
-      // const allValues = this.data.historical.map(m => m.value);
-      // const normalize = scaleLinear()
-      //   .domain([Math.min(...allValues), Math.max(...allValues)])
-      //   .range([0, 1]);
       root = svg.append("g");
       root
         .attr("id", "leftArea")
@@ -314,11 +310,11 @@ export default {
         .attr("d", this.leftArea)
         .attr("fill", (d, i) => this.leftFill[i]);
 
+      // right
       this.rightArea = area()
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
         .y1(d => this.yScale(d[1]));
-      // right
       root = svg.append("g");
       root
         .attr("id", "rightArea")
@@ -328,18 +324,6 @@ export default {
         .append("path")
         .attr("d", this.rightArea)
         .attr("fill", (d, i) => this.rightFill[i]);
-
-      // right
-      // root
-      //   // .append("g")
-      //   .selectAll("path")
-      //   .data(this.rightSeries)
-      //   .enter()
-      //   .append("path")
-      //   .attr("d", leftArea)
-      //   .attr("fill", (d, i) => colorArray[i % colorArray.length]);
-
-      // TODO
 
       //#endregion
 
@@ -426,6 +410,32 @@ export default {
         tip.transition().duration(300).remove();
       });
       //#endregion
+
+      //#region hover
+      svg.on("pointermove", this.pointermoved);
+      //#endregion
+    },
+
+    pointermoved(e) {
+      const x = e.offsetX,
+        y = e.offsetY;
+      if (x <= this.chartArea.bottomLeft.x || x >= this.chartArea.bottomLeft.x + this.chartArea.size.width) return;
+      if (y >= this.chartArea.bottomLeft.y || y <= this.widthes.axisDot) return;
+      const date = dayjs(this.xScale.invert(x));
+      console.log(x, date.format("YYYY-MM-DD"));
+
+      const svg = select("#_chart");
+      svg.selectAll("#hover-line").remove();
+      svg
+        .append("line")
+        .attr("id", "hover-line")
+        .attr("x1", x)
+        .attr("y1", this.chartArea.bottomLeft.y)
+        .attr("x2", x)
+        .attr("y2", this.chartArea.bottomLeft.y - this.chartArea.size.height)
+        .attr("stroke", this.colors.lineHistorical)
+        .attr("stroke-dasharray", "8,8")
+        .attr("stroke-width", 1);
     },
 
     drawTip(obj, root, size, date, value) {
@@ -577,9 +587,9 @@ export default {
         .attr("fill", (d, i) => this.rightFill[i]);
 
       // test
-      const svg = select("#_chart");
-      svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
-      svg.append("line").attr("x1", 0).attr("y1", 129.28).attr("x2", 1000).attr("y2", 129.28).attr("stroke", "blue");
+      // const svg = select("#_chart");
+      // svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
+      // svg.append("line").attr("x1", 0).attr("y1", 129.28).attr("x2", 1000).attr("y2", 129.28).attr("stroke", "blue");
       //#endregion
 
       //#region 曲线
