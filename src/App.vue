@@ -4,12 +4,15 @@
     <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
     <button v-on:click="handleClick">change data</button>
+
+    <Test1></Test1>
   </div>
 </template>
 
 <script>
 import dayjs from "dayjs";
 import HistoricalProjectedChart from "./components/HistoricalProjectedChart.vue";
+import Test1 from "./components/Test1.vue";
 
 export default {
   data() {
@@ -82,7 +85,7 @@ export default {
       this.choose = this.choose === 1 ? 2 : 1;
     },
   },
-  components: { HistoricalProjectedChart },
+  components: { HistoricalProjectedChart, Test1 },
 };
 </script>
 

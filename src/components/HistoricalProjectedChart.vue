@@ -54,8 +54,13 @@ export default {
       xScale: {},
       yScale: {},
       lineH: {},
-      stackData: [],
       series: {},
+      leftSeries: {},
+      leftFill: [],
+      rightSeries: {},
+      rightFill: [],
+      leftArea: {},
+      rightArea: {},
     };
   },
 
@@ -82,7 +87,7 @@ export default {
         },
       };
 
-      const all = [...this.data.historical, this.data.today, ...this.data.projectedPotential];
+      const all = [...this.data.historical, this.data.today, ...this.data.projectedCurrent, ...this.data.projectedPotential];
       const allDates = all.map(m => dayjs(m.date).toDate());
       const allValues = all.map(m => m.value);
       this.xScale = scaleUtc()
@@ -94,30 +99,55 @@ export default {
         .domain([yValueRange[0], yValueRange[2]])
         .range([this.chartArea.size.height, this.widthes.axisDot / 2]);
 
-      this.stackData = [
-        ...this.data.historical.map(m => ({ date: m.date, historical: m.value })),
-        { date: this.data.today.date, today: this.data.today.value },
-        ...this.projectedCurrentData.map(m => ({
-          date: m.date,
-          projectedCurrent: m.value,
-          projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
-        })),
-      ].map(m => {
-        const item = { ...m, baseline: 0 };
-        if (!item.historical) item.historical = item.baseline;
-        if (!item.today) item.today = item.historical;
-        if (!item.projectedCurrent) item.projectedCurrent = item.today;
-        if (!item.projectedPotential) item.projectedPotential = item.projectedCurrent;
-        return item;
-      });
-      this.stackData.forEach(m => console.log("stackData", JSON.stringify(m)));
+      /////
+      // const stackData = [
+      //   ...this.data.historical.map(m => ({ date: m.date, historical: m.value })),
+      //   { date: this.data.today.date, today: this.data.today.value },
+      //   ...this.projectedCurrentData.map(m => ({
+      //     date: m.date,
+      //     projectedCurrent: m.value,
+      //     projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
+      //   })),
+      // ].map(m => {
+      //   const item = { ...m, baseline: 0 };
+      //   if (!item.historical) item.historical = item.baseline;
+      //   if (!item.today) item.today = item.historical;
+      //   if (!item.projectedCurrent) item.projectedCurrent = item.today;
+      //   if (!item.projectedPotential) item.projectedPotential = item.projectedCurrent;
+      //   return item;
+      // });
+      // stackData.forEach(m => console.log("stackData", JSON.stringify(m)));
 
-      const myStack = stack().keys(["baseline", "historical", "today", "projectedCurrent", "projectedPotential"]);
-      this.series = myStack(this.stackData);
+      // const myStack = stack().keys(["baseline", "historical", "today", "projectedCurrent", "projectedPotential"]);
+      // this.series = myStack(stackData);
+      /////
+    },
+
+    initAreas() {
+      const allValuesH = this.data.historical.map(m => m.value);
+      const leftStackData = this.data.historical.map(m => ({ date: m.date, baseline: Math.min(...allValuesH), historical: m.value }));
+      leftStackData.push({ date: this.data.today.date, baseline: Math.min(...allValuesH), historical: this.data.today.value }); // today
+      const leftStack = stack().keys(["baseline", "historical"]);
+      this.leftSeries = leftStack(leftStackData);
+      this.leftFill = ["transparent", "url(#gradientH)"];
+      // console.log("leftSeries", this.leftSeries);
+
+      // const allValuesP = [...this.data.projectedCurrent.map(m => m.value), ...this.data.projectedCurrent.map(m => m.value)];
+      const rightStackData = this.projectedCurrentData.map(m => ({
+        date: m.date,
+        baseline: Math.min(...allValuesH),
+        projectedCurrent: m.value,
+        projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
+      }));
+      console.log("rightStackData", rightStackData);
+      const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
+      this.rightSeries = rightStack(rightStackData);
+      this.rightFill = ["transparent", "url(#gradientPC)", "url(#gradientPP)"];
     },
 
     init() {
       this.initScale();
+      this.initAreas();
 
       const svg = select("#_chart");
       svg.selectAll("*").remove();
@@ -144,6 +174,20 @@ export default {
       whiteFilter.append("feFlood").attr("flood-color", this.colors.background);
       whiteFilter.append("feComposite").attr("in", "SourceGraphic").attr("operator", "atop");
 
+      const gradientH = defs.append("linearGradient").attr("id", "gradientH").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
+      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
+      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 1)");
+      gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
+
+      const gradientPC = defs.append("linearGradient").attr("id", "gradientPC").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
+      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
+      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 1)");
+      gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
+
+      const gradientPP = defs.append("linearGradient").attr("id", "gradientPP").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
+      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
+      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 1)");
+      gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
       //#endregion
 
       //#region 坐标轴
@@ -251,6 +295,84 @@ export default {
         .attr("fill", this.colors.fontTickValue);
       //#endregion
 
+      //#region area
+      this.leftArea = area()
+        .x(d => {
+          // console.log("x", d.data.date.format("YYYY-MM-DD"), d);
+          return this.xScale(d.data.date);
+        })
+        .y0(d => {
+          // console.log("y0", this.yScale(d[0]));
+          return this.yScale(d[0]);
+        })
+        .y1(d => {
+          // console.log("y1", d[1] - d[0], this.yScale(d[1] - d[0]));
+          return this.yScale(d[1] - d[0]);
+        });
+
+      // left
+      // const allValues = this.data.historical.map(m => m.value);
+      // const normalize = scaleLinear()
+      //   .domain([Math.min(...allValues), Math.max(...allValues)])
+      //   .range([0, 1]);
+      root = svg.append("g");
+      root
+        .attr("id", "leftArea")
+        // .append("g")
+        .selectAll("path")
+        .data(this.leftSeries)
+        .enter()
+        .append("path")
+        .attr("d", this.leftArea)
+        .attr("fill", (d, i) => this.leftFill[i]);
+
+      this.rightArea = area()
+        .x(d => {
+          // console.log("x", d.data.date.format("YYYY-MM-DD"), this.yScale(d[0]), this.yScale(d[1]), d);
+          // console.log("x", d.data.date.format("YYYY-MM-DD"), d[0], d[1]);
+          return this.xScale(d.data.date);
+        })
+        .y0(d => {
+          // console.log("y0", this.yScale(d[0]));
+          return this.yScale(d[0]);
+        })
+        .y1(d => {
+          console.log("y1", d[1] - d[0], this.yScale(d[1] - d[0]), this.yScale(d[0]) - this.yScale(d[1]));
+          // return this.yScale(d[1]) - this.yScale(d[0]);
+          return this.yScale(d[1] - d[0]);
+        });
+      // right
+      root = svg.append("g");
+      root
+        .attr("id", "rightArea")
+        // .append("g")
+        .selectAll("path")
+        .data(this.rightSeries)
+        .enter()
+        .append("path")
+        .attr("d", this.rightArea)
+        .attr("fill", (d, i) => this.rightFill[i]);
+
+      // test
+      svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
+      svg.append("line").attr("x1", 0).attr("y1", 142).attr("x2", 1000).attr("y2", 142).attr("stroke", "blue");
+      svg.append("line").attr("x1", 0).attr("y1", 87).attr("x2", 1000).attr("y2", 87).attr("stroke", "yellow");
+      svg.append("line").attr("x1", 0).attr("y1", -10).attr("x2", 1000).attr("y2", -10).attr("stroke", "black");
+
+      // right
+      // root
+      //   // .append("g")
+      //   .selectAll("path")
+      //   .data(this.rightSeries)
+      //   .enter()
+      //   .append("path")
+      //   .attr("d", leftArea)
+      //   .attr("fill", (d, i) => colorArray[i % colorArray.length]);
+
+      // TODO
+
+      //#endregion
+
       //#region 曲线
       root = svg.append("g");
 
@@ -333,34 +455,6 @@ export default {
         var tip = select("#tip");
         tip.transition().duration(300).remove();
       });
-      //#endregion
-
-      //#region area
-      root = svg.append("g");
-
-      const myArea = area()
-        .x(d => {
-          return this.xScale(dayjs(d.data.date));
-        })
-        .y0(d => {
-          // console.log("y0", d);
-          return this.yScale(d[0]);
-        })
-        .y1(d => {
-          // console.log("y1", d);
-          return this.yScale(d[1]);
-        });
-      const colorArray = ["#38CCCB", "#0074D9", "#2FCC40", "#FEDC00", "#FF4036"];
-
-      // console.log("series", this.series);
-      root
-        // .append("g")
-        .selectAll("path")
-        .data(this.series)
-        .enter()
-        .append("path")
-        .attr("d", myArea)
-        .attr("fill", (d, i) => colorArray[i % colorArray.length]);
       //#endregion
     },
 
@@ -475,7 +569,59 @@ export default {
 
       this.initScale();
 
-      // today dot
+      //#region area
+      // const minValue = Math.min(...this.data.historical.map(m => m.value));
+      // const maxValue = Math.max(...this.data.historical.map(m => m.value));
+      // const leftStackData = this.data.historical.map(m => ({ date: m.date, baseline: minValue, historical: m.value }));
+      // leftStackData.push({ date: this.data.today.date, baseline: minValue, historical: this.data.today.value }); // today
+      // const leftStack = stack().keys(["baseline", "historical"]);
+      // this.leftSeries = leftStack(leftStackData);
+      this.initAreas();
+
+      // left
+      const leftArea = select("#leftArea");
+      leftArea.selectAll("path").data([]).exit().remove();
+      leftArea
+        // .append("g")
+        .selectAll("path")
+        .data(this.leftSeries)
+        .enter()
+        .append("path")
+        .transition()
+        .delay(200)
+        .attr("d", this.leftArea)
+        .attr("fill", (d, i) => this.leftFill[i]);
+
+      // right
+      const rightArea = select("#rightArea");
+      rightArea.selectAll("path").data([]).exit().remove();
+      rightArea
+        // .append("g")
+        .selectAll("path")
+        .data(this.rightSeries)
+        .enter()
+        .append("path")
+        .transition()
+        .delay(200)
+        .attr("d", this.rightArea)
+        .attr("fill", (d, i) => this.rightFill[i]);
+
+      // test
+      const svg = select("#_chart");
+      svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
+      svg.append("line").attr("x1", 0).attr("y1", 129.28).attr("x2", 1000).attr("y2", 129.28).attr("stroke", "blue");
+      //#endregion
+
+      //#region 曲线
+      // historical
+      select("#chartH").datum(this.historicalData).transition().attr("d", this.lineH);
+      // projectedCurrent
+      select("#chartPC").datum(this.projectedCurrentData).transition().attr("d", this.lineH);
+      // projectedPotential
+      select("#chartPP").datum(this.projectedPotentialData).transition().attr("d", this.lineH);
+      //#endregion
+
+      //#region today
       select("#today-dot")
         .transition()
         .attr("cx", this.xScale(dayjs(this.data.today.date)))
@@ -483,12 +629,7 @@ export default {
         .attr("cy", this.yScale(this.data.today.value))
         .attr("data-date", this.data.today.date)
         .attr("data-value", this.data.today.value);
-      // historical
-      select("#chartH").datum(this.historicalData).transition().attr("d", this.lineH);
-      // projectedCurrent
-      select("#chartPC").datum(this.projectedCurrentData).transition().attr("d", this.lineH);
-      // projectedPotential
-      select("#chartPP").datum(this.projectedPotentialData).transition().attr("d", this.lineH);
+      //#endregion
     },
   },
 };
