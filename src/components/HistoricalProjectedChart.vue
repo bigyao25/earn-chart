@@ -136,8 +136,8 @@ export default {
       const rightStackData = this.projectedCurrentData.map(m => ({
         date: m.date,
         baseline: Math.min(...allValuesH),
-        projectedCurrent: m.value,
-        projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
+        projectedCurrent: m.value - Math.min(...allValuesH), // 得到差值
+        projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value - m.value, // 得到差值
       }));
       console.log("rightStackData", rightStackData);
       const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
@@ -175,18 +175,15 @@ export default {
       whiteFilter.append("feComposite").attr("in", "SourceGraphic").attr("operator", "atop");
 
       const gradientH = defs.append("linearGradient").attr("id", "gradientH").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
-      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 1)");
+      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
       gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
 
       const gradientPC = defs.append("linearGradient").attr("id", "gradientPC").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
-      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 1)");
+      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
       gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
 
       const gradientPP = defs.append("linearGradient").attr("id", "gradientPP").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
-      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 1)");
+      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
       gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
       //#endregion
 
@@ -297,18 +294,9 @@ export default {
 
       //#region area
       this.leftArea = area()
-        .x(d => {
-          // console.log("x", d.data.date.format("YYYY-MM-DD"), d);
-          return this.xScale(d.data.date);
-        })
-        .y0(d => {
-          // console.log("y0", this.yScale(d[0]));
-          return this.yScale(d[0]);
-        })
-        .y1(d => {
-          // console.log("y1", d[1] - d[0], this.yScale(d[1] - d[0]));
-          return this.yScale(d[1] - d[0]);
-        });
+        .x(d => this.xScale(d.data.date))
+        .y0(d => this.yScale(d[0]))
+        .y1(d => this.yScale(d[1] - d[0]));
 
       // left
       // const allValues = this.data.historical.map(m => m.value);
@@ -327,37 +315,19 @@ export default {
         .attr("fill", (d, i) => this.leftFill[i]);
 
       this.rightArea = area()
-        .x(d => {
-          // console.log("x", d.data.date.format("YYYY-MM-DD"), this.yScale(d[0]), this.yScale(d[1]), d);
-          // console.log("x", d.data.date.format("YYYY-MM-DD"), d[0], d[1]);
-          return this.xScale(d.data.date);
-        })
-        .y0(d => {
-          // console.log("y0", this.yScale(d[0]));
-          return this.yScale(d[0]);
-        })
-        .y1(d => {
-          console.log("y1", d[1] - d[0], this.yScale(d[1] - d[0]), this.yScale(d[0]) - this.yScale(d[1]));
-          // return this.yScale(d[1]) - this.yScale(d[0]);
-          return this.yScale(d[1] - d[0]);
-        });
+        .x(d => this.xScale(d.data.date))
+        .y0(d => this.yScale(d[0]))
+        .y1(d => this.yScale(d[1]));
       // right
       root = svg.append("g");
       root
         .attr("id", "rightArea")
-        // .append("g")
         .selectAll("path")
         .data(this.rightSeries)
         .enter()
         .append("path")
         .attr("d", this.rightArea)
         .attr("fill", (d, i) => this.rightFill[i]);
-
-      // test
-      svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
-      svg.append("line").attr("x1", 0).attr("y1", 142).attr("x2", 1000).attr("y2", 142).attr("stroke", "blue");
-      svg.append("line").attr("x1", 0).attr("y1", 87).attr("x2", 1000).attr("y2", 87).attr("stroke", "yellow");
-      svg.append("line").attr("x1", 0).attr("y1", -10).attr("x2", 1000).attr("y2", -10).attr("stroke", "black");
 
       // right
       // root
