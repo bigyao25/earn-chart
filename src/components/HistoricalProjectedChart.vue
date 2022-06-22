@@ -54,12 +54,11 @@ export default {
       xScale: {},
       yScale: {},
       lineH: {},
-      series: {},
       leftSeries: {},
       leftFill: [],
+      leftArea: {},
       rightSeries: {},
       rightFill: [],
-      leftArea: {},
       rightArea: {},
     };
   },
@@ -98,29 +97,6 @@ export default {
       this.yScale = scaleLinear()
         .domain([yValueRange[0], yValueRange[2]])
         .range([this.chartArea.size.height, this.widthes.axisDot / 2]);
-
-      /////
-      // const stackData = [
-      //   ...this.data.historical.map(m => ({ date: m.date, historical: m.value })),
-      //   { date: this.data.today.date, today: this.data.today.value },
-      //   ...this.projectedCurrentData.map(m => ({
-      //     date: m.date,
-      //     projectedCurrent: m.value,
-      //     projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value,
-      //   })),
-      // ].map(m => {
-      //   const item = { ...m, baseline: 0 };
-      //   if (!item.historical) item.historical = item.baseline;
-      //   if (!item.today) item.today = item.historical;
-      //   if (!item.projectedCurrent) item.projectedCurrent = item.today;
-      //   if (!item.projectedPotential) item.projectedPotential = item.projectedCurrent;
-      //   return item;
-      // });
-      // stackData.forEach(m => console.log("stackData", JSON.stringify(m)));
-
-      // const myStack = stack().keys(["baseline", "historical", "today", "projectedCurrent", "projectedPotential"]);
-      // this.series = myStack(stackData);
-      /////
     },
 
     initAreas() {
@@ -130,9 +106,7 @@ export default {
       const leftStack = stack().keys(["baseline", "historical"]);
       this.leftSeries = leftStack(leftStackData);
       this.leftFill = ["transparent", "url(#gradientH)"];
-      // console.log("leftSeries", this.leftSeries);
 
-      // const allValuesP = [...this.data.projectedCurrent.map(m => m.value), ...this.data.projectedCurrent.map(m => m.value)];
       const rightStackData = this.projectedCurrentData.map(m => ({
         date: m.date,
         baseline: Math.min(...allValuesH),
@@ -328,20 +302,15 @@ export default {
       //#endregion
 
       //#region 曲线
+
       root = svg.append("g");
 
       // historical
-      // const historicalChart = root.append("g");
-      // obj = historicalChart
-      //   .selectAll("p")
-      //   .data(yValues) // parses data, and runs below operations n times
-      //   .enter() // creates new data-bound element
-      //   .append("p") // append <p> tag for each datum
-      //   .text(d => d); // changes attribute's value
       this.lineH = line()
         .x(d => this.xScale(dayjs(d.date)))
         .y(d => this.yScale(d.value))
-        .curve(curveBasis);
+        // .curve(curveBasis);
+        .curve(curveLinear);
       // historical
       root
         .append("path")
@@ -370,9 +339,11 @@ export default {
         .attr("stroke", this.colors.lineProjectedPotential)
         .attr("stroke-width", 3)
         .attr("fill", "transparent");
+
       //#endregion
 
       //#region today
+
       // line
       root = svg.append("g");
       root
@@ -386,36 +357,19 @@ export default {
         .attr("stroke-width", 1);
 
       // dot
-      obj = root
-        .append("circle")
-        .attr("id", "today-dot")
-        .attr("cx", this.xScale(dayjs(this.data.today.date)))
-        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
-        .attr("cy", this.yScale(this.data.today.value))
-        .attr("r", 5)
-        .attr("fill", this.colors.lineHistorical)
-        .attr("stroke", "#FFFFFF")
-        .attr("stroke-width", "2")
-        .attr("filter", "drop-shadow(0 0 8px rgba(85, 170, 0, 0.9))")
-        .attr("data-date", this.data.today.date)
-        .attr("data-value", this.data.today.value);
+      const dotDate = this.data.today.date;
+      const dotValue = this.data.today.value;
+      this.drawDot(root, dotDate, dotValue, this.colors.lineHistorical, "rgba(85, 170, 0, 0.9)");
 
-      const $vue = this;
-      obj.on("mouseover", function (d) {
-        $vue.drawTip(this, root);
-      });
-
-      obj.on("mouseout", function (d) {
-        var tip = select("#tip");
-        tip.transition().duration(300).remove();
-      });
       //#endregion
 
       //#region hover
+
       svg.on("pointermove", this.pointermoved);
       svg.on("mouseleave", () => {
         select("#_chart").selectAll("#hover").remove();
       });
+
       //#endregion
     },
 
@@ -428,18 +382,20 @@ export default {
         svg.selectAll("#hover").remove();
         return;
       }
-      const date = dayjs(this.xScale.invert(x));
-      // console.log(x, date.format("YYYY-MM-DD"));
 
-      // svg.selectAll("#hover-line").remove();
+      let date = dayjs(this.xScale.invert(x));
+      // date = dayjs(date.format("YYYY-MM-DD"));
+
       svg.selectAll("#hover").remove();
       const root = svg.append("g").attr("id", "hover");
       root
         .append("line")
         .attr("id", "hover-line")
         .attr("x1", x)
+        // .attr("x1", this.xScale(date))
         .attr("y1", this.chartArea.bottomLeft.y)
         .attr("x2", x)
+        // .attr("x2", this.xScale(date))
         .attr("y2", this.chartArea.bottomLeft.y - this.chartArea.size.height)
         .attr("stroke", this.colors.lineHistorical)
         .attr("stroke-dasharray", "8,8")
@@ -447,19 +403,47 @@ export default {
 
       const itemH = this.historicalData.find(m => m.date.isSame(date, "date"));
       if (itemH) {
-        const y = this.yScale(itemH.value);
-        console.log("y", y);
+        this.drawDot(root, date, itemH.value, this.colors.lineHistorical, "rgba(85, 170, 0, 0.9)");
+        return;
+      }
+      const itemPC = this.projectedCurrentData.find(m => m.date.isSame(date, "date"));
+      const itemPP = this.projectedPotentialData.find(m => m.date.isSame(date, "date"));
+      if (itemPC && itemPP) {
+        this.drawDot(root, date, itemPC.value, this.colors.lineProjectedCurrent, "rgba(104, 132, 220, 0.9)");
+        this.drawDot(root, date, itemPP.value, this.colors.lineProjectedPotential, "rgba(146, 91, 202, 0.9)");
       }
     },
 
-    drawDot() {},
+    drawDot(root, date, value, fillColor, filterColor) {
+      const obj = root
+        .append("circle")
+        .attr("id", "today-dot")
+        .attr("cx", this.xScale(date))
+        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
+        .attr("cy", this.yScale(value))
+        .attr("r", 5)
+        .attr("fill", fillColor)
+        .attr("stroke", "#FFFFFF")
+        .attr("stroke-width", "2")
+        .attr("filter", `drop-shadow(0 0 8px ${filterColor})`)
+        .attr("data-date", date)
+        .attr("data-value", value);
 
-    drawTip(obj, root, size, date, value) {
-      var tip = select("#tip"); // TODO: 应该在 svg 中 select
+      const $vue = this;
+      obj.on("mouseover", function (d) {
+        $vue.drawTip(this, root);
+      });
+
+      obj.on("mouseout", function (d) {
+        var tip = select("#tip");
+        tip.transition().duration(300).remove();
+      });
+    },
+
+    drawTip(obj, root) {
+      var tip = select("#tip");
       if (!tip.empty()) return;
 
-      // const tipWidth = this.width * (0.5782 - 0.1425);
-      // const tipHeight = this.height * ((0.4399 - 0.3703) / (0.8006 - 0.1994));
       const tipWidth = 130;
       const tipHeight = 70;
       var self = select(obj);
@@ -482,7 +466,6 @@ export default {
 
       const tipDate = self.attr("data-date");
       const tipValue = self.attr("data-value");
-      // console.log(dayjs(tipDate).format("MMM D"));
 
       tip
         .append("text")
@@ -499,7 +482,6 @@ export default {
         .text("Rewards")
         .attr("dx", self.property("cx").baseVal.value)
         .attr("dy", tipY + 40)
-        // .attr("filter", "url(#solid)")
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
@@ -509,7 +491,6 @@ export default {
         .text(`$${tipValue}`)
         .attr("dx", self.property("cx").baseVal.value)
         .attr("dy", tipY + 60)
-        // .attr("filter", "url(#solid)")
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
@@ -556,7 +537,6 @@ export default {
 
   watch: {
     data: function (n, o) {
-      // this.init();
       console.log("data changed.");
       this.historicalData = [...this.data.historical, this.data.today];
       this.todayData = this.data.today;
@@ -566,12 +546,7 @@ export default {
       this.initScale();
 
       //#region area
-      // const minValue = Math.min(...this.data.historical.map(m => m.value));
-      // const maxValue = Math.max(...this.data.historical.map(m => m.value));
-      // const leftStackData = this.data.historical.map(m => ({ date: m.date, baseline: minValue, historical: m.value }));
-      // leftStackData.push({ date: this.data.today.date, baseline: minValue, historical: this.data.today.value }); // today
-      // const leftStack = stack().keys(["baseline", "historical"]);
-      // this.leftSeries = leftStack(leftStackData);
+
       this.initAreas();
 
       // left
@@ -602,18 +577,11 @@ export default {
         .attr("d", this.rightArea)
         .attr("fill", (d, i) => this.rightFill[i]);
 
-      // test
-      // const svg = select("#_chart");
-      // svg.append("line").attr("x1", 0).attr("y1", 185).attr("x2", 1000).attr("y2", 185).attr("stroke", "red");
-      // svg.append("line").attr("x1", 0).attr("y1", 129.28).attr("x2", 1000).attr("y2", 129.28).attr("stroke", "blue");
       //#endregion
 
       //#region 曲线
-      // historical
       select("#chartH").datum(this.historicalData).transition().attr("d", this.lineH);
-      // projectedCurrent
       select("#chartPC").datum(this.projectedCurrentData).transition().attr("d", this.lineH);
-      // projectedPotential
       select("#chartPP").datum(this.projectedPotentialData).transition().attr("d", this.lineH);
       //#endregion
 
