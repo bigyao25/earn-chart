@@ -1,39 +1,40 @@
-name: build and deploy
+# 该workflow的名称，可以随意填写
+name: Build And Deploy To Github Pages
 
-# 当 master 分支 push 代码的时候触发 workflow
+# workflow的触发事件，这里代表main分支的push事件触发
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
+# 任务
 jobs:
-  build-deploy:
+  # build-and-deploy 为任务的ID
+  build-and-deploy:
+    # 运行所需要的环境
     runs-on: ubuntu-latest
+
     steps:
-      # 下载仓库代码
-      - uses: actions/checkout@v2
-
-      # 缓存依赖
-      - name: Get yarn cache
-        id: yarn-cache
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-      - uses: actions/cache@v1
+      # 步骤名
+      - name: Checkout
+        # 使用的actions脚本，这里是官方提供的获取源码脚本
+        uses: actions/checkout@v2.3.1
+        # 这个为使用 JamesIves/github-pages-deploy-action脚本所需要的配置
         with:
-          path: ${{ steps.yarn-cache.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
+          persist-credentials: false
 
-      # 安装依赖
-      - run: yarn
+      # 执行npm脚本打包项目
+      - name: Install and Build
+        run: |
+          npm install
+          npm run build
 
-      # 打包构建
-      - run: yarn build
-
-      # 发布到 GitHub Pages
+      # 执行JamesIves/github-pages-deploy-action将项目发布到Github Pages
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v2
-        env:
-          PERSONAL_TOKEN: ${{ secrets.ACCESS_TOKEN }} # 访问秘钥
-          PUBLISH_BRANCH: main # 推送分支
-          PUBLISH_DIR: ./dist # 部署目录
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          # 该workflow需要操作repo，因此需要一个密钥，下面会讲到如何获取这个密钥
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          # 发布到的分支
+          BRANCH: gh-pages
+          # 要发布的文件夹
+          FOLDER: dist
