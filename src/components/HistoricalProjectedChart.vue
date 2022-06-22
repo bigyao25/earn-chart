@@ -413,20 +413,28 @@ export default {
 
       //#region hover
       svg.on("pointermove", this.pointermoved);
+      svg.on("mouseleave", () => {
+        select("#_chart").selectAll("#hover").remove();
+      });
       //#endregion
     },
 
     pointermoved(e) {
       const x = e.offsetX,
         y = e.offsetY;
-      if (x <= this.chartArea.bottomLeft.x || x >= this.chartArea.bottomLeft.x + this.chartArea.size.width) return;
-      if (y >= this.chartArea.bottomLeft.y || y <= this.widthes.axisDot) return;
-      const date = dayjs(this.xScale.invert(x));
-      console.log(x, date.format("YYYY-MM-DD"));
-
       const svg = select("#_chart");
-      svg.selectAll("#hover-line").remove();
-      svg
+
+      if (x <= this.chartArea.bottomLeft.x || x >= this.chartArea.bottomLeft.x + this.chartArea.size.width || y >= this.chartArea.bottomLeft.y || y <= this.widthes.axisDot) {
+        svg.selectAll("#hover").remove();
+        return;
+      }
+      const date = dayjs(this.xScale.invert(x));
+      // console.log(x, date.format("YYYY-MM-DD"));
+
+      // svg.selectAll("#hover-line").remove();
+      svg.selectAll("#hover").remove();
+      const root = svg.append("g").attr("id", "hover");
+      root
         .append("line")
         .attr("id", "hover-line")
         .attr("x1", x)
@@ -436,7 +444,15 @@ export default {
         .attr("stroke", this.colors.lineHistorical)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
+
+      const itemH = this.historicalData.find(m => m.date.isSame(date, "date"));
+      if (itemH) {
+        const y = this.yScale(itemH.value);
+        console.log("y", y);
+      }
     },
+
+    drawDot() {},
 
     drawTip(obj, root, size, date, value) {
       var tip = select("#tip"); // TODO: 应该在 svg 中 select
