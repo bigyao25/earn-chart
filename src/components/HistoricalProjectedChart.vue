@@ -6,7 +6,6 @@
 
 <script>
 /**
- * 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
  * TODO：黑夜模式
  */
 import dayjs from "dayjs";
