@@ -384,23 +384,36 @@ export default {
       }
 
       let date = dayjs(this.xScale.invert(x));
-      // date = dayjs(date.format("YYYY-MM-DD"));
+      date = dayjs(date.format("YYYY-MM-DD"));
+      // date = dayjs(date.format("YYYY-MM-DD")).add(12, "hour");
 
       svg.selectAll("#hover").remove();
       const root = svg.append("g").attr("id", "hover");
+
+      // line
       root
         .append("line")
         .attr("id", "hover-line")
-        .attr("x1", x)
-        // .attr("x1", this.xScale(date))
+        // .attr("x1", x)
+        .attr("x1", this.xScale(date))
         .attr("y1", this.chartArea.bottomLeft.y)
-        .attr("x2", x)
-        // .attr("x2", this.xScale(date))
+        // .attr("x2", x)
+        .attr("x2", this.xScale(date))
         .attr("y2", this.chartArea.bottomLeft.y - this.chartArea.size.height)
         .attr("stroke", this.colors.lineHistorical)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
 
+      // shadow area
+      root
+        .append("rect")
+        .attr("x", this.xScale(date))
+        .attr("y", this.widthes.axisDot)
+        .attr("width", this.xScale(date.add(1, "day")) - this.xScale(date))
+        .attr("height", this.chartArea.size.height)
+        .attr("fill", "rgba(85, 170, 0, 0.1)");
+
+      // dot
       const itemH = this.historicalData.find(m => m.date.isSame(date, "date"));
       if (itemH) {
         this.drawDot(root, date, itemH.value, this.colors.lineHistorical, "rgba(85, 170, 0, 0.9)");
@@ -444,11 +457,23 @@ export default {
       var tip = select("#tip");
       if (!tip.empty()) return;
 
+      var self = select(obj);
       const tipWidth = 130;
       const tipHeight = 70;
-      var self = select(obj);
-      const tipX = self.property("cx").baseVal.value - tipWidth / 2;
-      const tipY = self.property("cy").baseVal.value - tipHeight - 10;
+      const cx = self.property("cx").baseVal.value;
+      const cy = self.property("cy").baseVal.value;
+
+      let tipX = cx - tipWidth / 2;
+      let tipY = cy - tipHeight - 10;
+      if (tipX < this.chartArea.bottomLeft.x) {
+        tipX = this.chartArea.bottomLeft.x;
+      } else if (tipX + tipWidth > this.chartArea.bottomLeft.x + this.chartArea.size.width) {
+        tipX = cx - tipWidth;
+      }
+      if (tipY < 0) {
+        tipY = cy;
+      } else {
+      }
 
       tip = root.append("g").attr("id", "tip").attr("x", tipX).attr("y", tipY);
 
@@ -470,7 +495,8 @@ export default {
       tip
         .append("text")
         .text(dayjs(tipDate).format("MMM D"))
-        .attr("dx", self.property("cx").baseVal.value)
+        // .attr("dx", self.property("cx").baseVal.value)
+        .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 20)
         // .attr("filter", "url(#solid)")
         .attr("style", "font-family: Mulish; font-size: 12; font-weight: 400;")
@@ -480,7 +506,7 @@ export default {
       tip
         .append("text")
         .text("Rewards")
-        .attr("dx", self.property("cx").baseVal.value)
+        .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 40)
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
         .attr("text-anchor", "middle")
@@ -489,7 +515,7 @@ export default {
       tip
         .append("text")
         .text(`$${tipValue}`)
-        .attr("dx", self.property("cx").baseVal.value)
+        .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 60)
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
         .attr("text-anchor", "middle")
