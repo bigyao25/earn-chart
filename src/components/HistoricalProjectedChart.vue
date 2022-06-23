@@ -241,6 +241,7 @@ export default {
       root
         .append("text")
         .text(dateMin.format("MMM D, YYYY"))
+        .attr("id", "x-ticke-min")
         .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
@@ -249,6 +250,7 @@ export default {
       root
         .append("text")
         .text(dateToday.format("MMM D, YYYY"))
+        .attr("id", "x-ticke-today")
         .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
@@ -258,6 +260,7 @@ export default {
       root
         .append("text")
         .text(dateMax.format("MMM D, YYYY"))
+        .attr("id", "x-ticke-max")
         .attr("x", this.width)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("text-anchor", "end")
@@ -570,6 +573,17 @@ export default {
       this.projectedPotentialData = [this.data.today, ...this.data.projectedPotential];
 
       this.initScale();
+
+      //#region 标尺文字
+
+      const dateToday = this.data.today.date;
+      const dateMin = this.data.historical[0].date;
+      const dateMax = this.data.projectedPotential.slice(-1)[0].date;
+      select("#x-ticke-min").text(dateMin.format("MMM D, YYYY"));
+      select("#x-ticke-today").text(dateToday.format("MMM D, YYYY"));
+      select("#x-ticke-max").text(dateMax.format("MMM D, YYYY"));
+
+      //#endregion
 
       //#region area
 
