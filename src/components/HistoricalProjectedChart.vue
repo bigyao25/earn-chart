@@ -312,8 +312,8 @@ export default {
       this.lineH = line()
         .x(d => this.xScale(dayjs(d.date)))
         .y(d => this.yScale(d.value))
-        .curve(curveBasis);
-      // .curve(curveLinear);
+        // .curve(curveBasis);
+        .curve(curveLinear);
       // historical
       root
         .append("path")
