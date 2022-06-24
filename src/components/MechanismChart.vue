@@ -145,27 +145,33 @@ export default {
     },
 
     fillData() {
-      this.dataDefi = [
-        { date: 0, value: 1 },
-        { date: 1, value: Math.pow(1 + this.apys.defi, 1) },
-        { date: 2, value: Math.pow(1 + this.apys.defi, 2) },
-        { date: 3, value: Math.pow(1 + this.apys.defi, 3) },
-        { date: 4, value: Math.pow(1 + this.apys.defi, 4) },
-      ];
-      this.dataStaking = [
-        { date: 0, value: 1 },
-        { date: 1, value: Math.pow(1 + this.apys.staking, 1) },
-        { date: 2, value: Math.pow(1 + this.apys.staking, 2) },
-        { date: 3, value: Math.pow(1 + this.apys.staking, 3) },
-        { date: 4, value: Math.pow(1 + this.apys.staking, 4) },
-      ];
-      this.dataLiquid = [
-        { date: 0, value: 1 },
-        { date: 1, value: Math.pow(1 + this.apys.liquid, 1) },
-        { date: 2, value: Math.pow(1 + this.apys.liquid, 2) },
-        { date: 3, value: Math.pow(1 + this.apys.liquid, 3) },
-        { date: 4, value: Math.pow(1 + this.apys.liquid, 4) },
-      ];
+      if (this.apys.defi) {
+        this.dataDefi = [
+          { date: 0, value: 1 },
+          { date: 1, value: Math.pow(1 + this.apys.defi, 1) },
+          { date: 2, value: Math.pow(1 + this.apys.defi, 2) },
+          { date: 3, value: Math.pow(1 + this.apys.defi, 3) },
+          { date: 4, value: Math.pow(1 + this.apys.defi, 4) },
+        ];
+      }
+      if (this.apys.staking) {
+        this.dataStaking = [
+          { date: 0, value: 1 },
+          { date: 1, value: Math.pow(1 + this.apys.staking, 1) },
+          { date: 2, value: Math.pow(1 + this.apys.staking, 2) },
+          { date: 3, value: Math.pow(1 + this.apys.staking, 3) },
+          { date: 4, value: Math.pow(1 + this.apys.staking, 4) },
+        ];
+      }
+      if (this.apys.liquid) {
+        this.dataLiquid = [
+          { date: 0, value: 1 },
+          { date: 1, value: Math.pow(1 + this.apys.liquid, 1) },
+          { date: 2, value: Math.pow(1 + this.apys.liquid, 2) },
+          { date: 3, value: Math.pow(1 + this.apys.liquid, 3) },
+          { date: 4, value: Math.pow(1 + this.apys.liquid, 4) },
+        ];
+      }
     },
 
     initChart() {
@@ -193,7 +199,8 @@ export default {
         .tickSizeInner(0)
         .tickPadding(25);
 
-      const maxApy = Math.max(this.apys.defi, this.apys.staking, this.apys.liquid);
+      const maxApy = Math.max(this.apys.defi ?? -1, this.apys.staking ?? -1, this.apys.liquid ?? -1);
+      console.log("maxApy", maxApy);
       if (maxApy === this.apys.defi) {
         this.yScale = scaleLinear()
           .domain([this.dataDefi[0].value, this.dataDefi[this.dataDefi.length - 1].value])
@@ -215,7 +222,6 @@ export default {
       svg.selectAll("#staking-selected").remove();
 
       const selected = this.selectedIndex;
-      console.log("haldleSelection", selected);
       if (selected < 0) return;
 
       let data;
