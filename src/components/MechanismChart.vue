@@ -66,11 +66,12 @@ export default {
       this.initScale();
 
       const svg = select("#_mechanism_chart");
-      svg.selectAll("*").remove();
-
       svg.attr("viewBox", [0, 0, this.width, this.height]).attr("style", "max-width: 100%; height: auto; height: intrinsic;").attr("font-family", "Mulish Bold").attr("font-size", 14);
       // .on("touchstart", event => event.preventDefault())
       // .on("pointermove", pointermoved);
+
+      svg.selectAll("*").remove();
+      // const body = svg.append('g').attr('id', 'body');
 
       //#region axis
 
@@ -87,7 +88,7 @@ export default {
 
       // 修正x轴两端刻度
       // axisX.selectAll(".tick:nth-child(2)").attr("transform", "translate(8, 0)");
-      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 19}, 0)`);
+      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
       axisX.selectAll(".tick:nth-child(2)").remove();
 
       axisX.selectAll(".tick").on("click", event => {
@@ -168,12 +169,15 @@ export default {
     },
 
     initChart() {
+      const marginRight = 12;
+
       this.chartArea = {
         bottomLeft: { x: this.widthes.axisDot, y: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot },
         size: {
-          width: this.width - this.widthes.axisDot - this.widthes.axisDot,
+          width: this.width - this.widthes.axisDot - this.widthes.axisDot - marginRight,
           height: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot - this.widthes.axisDot,
         },
+        marginRight,
       };
     },
 
@@ -259,12 +263,12 @@ export default {
         .selectAll(`.tick:nth-child(${1 + selected})`)
         .classed("tick-selected", true);
 
-      const offsetLast = selected === 4 ? -16 : 3;
       svg.select("#axis-x-selected-border").remove();
+      const offset = selected === 4 ? -4 : 3;
       svg
         .append("rect")
         .attr("id", "axis-x-selected-border")
-        .attr("x", this.widthes.yTickeValueArea + (this.chartArea.size.width / 4) * selected - this.widthes.tickButtonWidth / 2 + offsetLast)
+        .attr("x", this.widthes.yTickeValueArea + (this.chartArea.size.width / 4) * selected - this.widthes.tickButtonWidth / 2 + offset)
         .attr("y", this.chartArea.size.height + this.widthes.xTickeValueArea - this.widthes.tickButtonHeight - 2)
         .attr("width", this.widthes.tickButtonWidth)
         .attr("height", this.widthes.tickButtonHeight)
