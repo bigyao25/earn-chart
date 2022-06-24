@@ -18,6 +18,7 @@ export default {
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
     apys: Object,
+    selected: Number,
   },
 
   data() {
@@ -47,11 +48,15 @@ export default {
       myLine: {},
       xAxis: {},
       yAxis: {},
+      selectedIndex: -1,
     };
   },
 
   mounted() {
     this.init();
+
+    this.selectedIndex = this.selected ?? -1;
+    this.haldleSelection();
   },
 
   methods: {
@@ -87,7 +92,8 @@ export default {
 
       axisX.selectAll(".tick").on("click", event => {
         const selected = parseInt(event.target.innerHTML.substring(0, 1));
-        this.haldleSelection(selected);
+        this.selectedIndex = selected;
+        this.haldleSelection();
       });
 
       //#endregion
@@ -200,11 +206,15 @@ export default {
       this.yAxis = axisRight(this.yScale).ticks(0, "").tickSizeOuter(0).tickSizeInner(0);
     },
 
-    haldleSelection(selected) {
+    haldleSelection() {
       const svg = select("#_mechanism_chart");
       svg.selectAll("#staking-selected").remove();
-      let data;
 
+      const selected = this.selectedIndex;
+      console.log("haldleSelection", selected);
+      if (selected < 0) return;
+
+      let data;
       data = this.dataDefi.filter(m => m.date <= selected);
       svg
         .append("path")
@@ -269,7 +279,10 @@ export default {
 
     handleClick(event) {
       const selected = Math.ceil(this.xScale.invert(event.x));
-      this.haldleSelection(selected);
+      // this.haldleSelection(selected);
+      this.selectedIndex = selected;
+      console.log(this.selectedIndex);
+      this.haldleSelection();
     },
   },
 };

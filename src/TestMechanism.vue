@@ -1,5 +1,5 @@
 <template>
-  <MechanismChart :apys="apys" :width="378" :height="270" />
+  <MechanismChart :apys="apys" :selected="2" :width="378" :height="270" />
 </template>
 
 <script>
