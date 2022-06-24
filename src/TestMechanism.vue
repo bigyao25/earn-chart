@@ -1,5 +1,5 @@
 <template>
-  <MechanismChart :apys="apys" :width="400" :height="220" />
+  <MechanismChart :apys="apys" :width="378" :height="270" />
 </template>
 
 <script>
@@ -10,7 +10,7 @@ export default {
   data() {
     return {
       apys: {
-        defi: 0.9,
+        defi: 0.4,
         staking: 0.3,
         liquid: 0.04,
       },
