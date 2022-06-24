@@ -14,7 +14,7 @@
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleUtc, scaleLinear } from "d3-scale";
-import { line, curveLinear, curveBasis, stack, area } from "d3-shape";
+import { line, curveLinear, curveBasis, curveCardinal, stack, area } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
 
@@ -316,7 +316,8 @@ export default {
         .x(d => this.xScale(dayjs(d.date)))
         .y(d => this.yScale(d.value))
         // .curve(curveBasis);
-        .curve(curveLinear);
+        // .curve(curveLinear);
+        .curve(curveCardinal);
       // historical
       root
         .append("path")
