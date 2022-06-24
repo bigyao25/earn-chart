@@ -1,12 +1,15 @@
 <template>
   <div class="chart relative">
-    <svg id="_chart" :height="height" :width="width"></svg>
+    <svg id="_hp_chart" :height="height" :width="width"></svg>
   </div>
 </template>
 
 <script>
 /**
  * TODO：黑夜模式
+ * TODO: 小数精度
+ * TODO: 最后一天的tip无法显示
+ * TODO: 鼠标竖线上下的小菱形
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
@@ -113,7 +116,7 @@ export default {
         projectedCurrent: m.value - Math.min(...allValuesH), // 得到差值
         projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value - m.value, // 得到差值
       }));
-      console.log("rightStackData", rightStackData);
+      // console.log("rightStackData", rightStackData);
       const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
       this.rightSeries = rightStack(rightStackData);
       this.rightFill = ["transparent", "url(#gradientPC)", "url(#gradientPP)"];
@@ -123,7 +126,7 @@ export default {
       this.initScale();
       this.initAreas();
 
-      const svg = select("#_chart");
+      const svg = select("#_hp_chart");
       svg.selectAll("*").remove();
 
       var defs = svg.append("defs");
@@ -370,7 +373,7 @@ export default {
 
       svg.on("pointermove", this.pointermoved);
       svg.on("mouseleave", () => {
-        select("#_chart").selectAll("#hover").remove();
+        select("#_hp_chart").selectAll("#hover").remove();
       });
 
       //#endregion
@@ -379,7 +382,7 @@ export default {
     pointermoved(e) {
       const x = e.offsetX,
         y = e.offsetY;
-      const svg = select("#_chart");
+      const svg = select("#_hp_chart");
 
       if (x <= this.chartArea.bottomLeft.x || x >= this.chartArea.bottomLeft.x + this.chartArea.size.width || y >= this.chartArea.bottomLeft.y || y <= this.widthes.axisDot) {
         svg.selectAll("#hover").remove();
@@ -566,7 +569,7 @@ export default {
 
   watch: {
     data: function (n, o) {
-      console.log("data changed.");
+      // console.log("data changed.");
       this.historicalData = [...this.data.historical, this.data.today];
       this.todayData = this.data.today;
       this.projectedCurrentData = [this.data.today, ...this.data.projectedCurrent];
