@@ -7,6 +7,7 @@
 <script>
 /**
  * TODO：黑夜模式
+ * TODO: Y轴刻度+网格线
  * ✅TODO: 小数精度
  * ✅TODO: 最后一天的tip无法显示
  * ✅TODO: 鼠标竖线上下的小菱形
@@ -55,6 +56,7 @@ export default {
       todayData: this.data.today,
       projectedCurrentData: [this.data.today, ...this.data.projectedCurrent],
       projectedPotentialData: [this.data.today, ...this.data.projectedPotential],
+      allData: [],
       chartArea: {},
       xScale: {},
       yScale: {},
@@ -91,9 +93,9 @@ export default {
         },
       };
 
-      const all = [...this.data.historical, this.data.today, ...this.data.projectedCurrent, ...this.data.projectedPotential];
-      const allDates = all.map(m => dayjs(m.date));
-      const allValues = all.map(m => m.value);
+      this.allData = [...this.data.historical, this.data.today, ...this.data.projectedCurrent, ...this.data.projectedPotential];
+      const allDates = this.allData.map(m => dayjs(m.date));
+      const allValues = this.allData.map(m => m.value);
       this.xScale = scaleUtc()
         .domain([allDates[0], allDates[allDates.length - 1].add(2, "hour")])
         .range([this.chartArea.bottomLeft.x, this.chartArea.bottomLeft.x + this.chartArea.size.width]);
@@ -133,7 +135,6 @@ export default {
 
       var defs = svg.append("defs");
       var root;
-      var obj;
 
       //#region defs
       // 坐标轴圆点
@@ -177,11 +178,34 @@ export default {
         .attr("y1", this.widthes.axisDot)
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.chartArea.size.height + this.widthes.axisDot)
-        // .attr("y2", this.height - this.widthes.axisDot - this.widthes.xTickeValueArea)
-        // .attr("width", 4)
         .attr("stroke", this.colors.axisLine)
         .attr("marker-end", "url(#axisDot)")
         .attr("marker-start", "url(#axisDot)");
+
+      const allValues = this.allData.map(m => m.value);
+      const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
+      yTicks.forEach(n => {
+        root
+          .append("line")
+          .attr("x1", this.chartArea.bottomLeft.x)
+          .attr("y1", this.yScale(n.toNumber()))
+          .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+          .attr("y2", this.yScale(n.toNumber()))
+          .attr("stroke", this.colors.axisLine)
+          .attr("stroke-dasharray", "8,8")
+          .attr("stroke-width", 1);
+        root
+          .append("text")
+          .attr("x", 0)
+          .attr("y", this.yScale(n.toNumber()))
+          .text("$" + format(".2~s")(n.toNumber()).toUpperCase())
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "middle")
+          .attr("font-family", "Mulish")
+          .attr("font-size", this.widthes.tickeValueFontSize)
+          .attr("font-weight", this.widthes.tickeValueFontWeight)
+          .attr("fill", this.colors.fontTickValue);
+      });
 
       /**
        * x
@@ -239,7 +263,7 @@ export default {
         .attr("font-size", this.widthes.tickeValueFontSize)
         .attr("font-weight", this.widthes.tickeValueFontWeight)
         .attr("fill", this.colors.fontProjected);
-      // 标尺文字
+      // x 文字
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
       const dateMax = this.data.projectedPotential.slice(-1)[0].date;

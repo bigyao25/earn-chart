@@ -5,6 +5,11 @@
 </template>
 
 <script>
+/**
+ * TODO：黑夜模式
+ * TODO: X轴网格线
+ * TODO: 应该传入每年的预计息后资产（加入复利的）
+ */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleUtc, scaleLinear } from "d3-scale";
