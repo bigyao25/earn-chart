@@ -19,6 +19,7 @@ export default {
     width: { type: Number, default: 500 },
     apys: Object,
     selected: Number,
+    onAxisClick: Function,
   },
 
   data() {
@@ -95,6 +96,9 @@ export default {
         const selected = parseInt(event.target.innerHTML.substring(0, 1));
         this.selectedIndex = selected;
         this.haldleSelection();
+
+        // if (onAxisClick) onAxisClick(selected);
+        this.$emit("axisXClick", selected);
       });
 
       //#endregion
@@ -309,6 +313,7 @@ export default {
         font-family: "Mulish Bold";
         font-size: 14px;
         fill: #2c2236;
+        cursor: pointer;
       }
     }
     .tick-selected {

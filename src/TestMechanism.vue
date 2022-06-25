@@ -1,5 +1,7 @@
 <template>
-  <MechanismChart :apys="apys" :selected="2" :width="378" :height="270" />
+  <MechanismChart :apys="apys" :selected="selected" @axis-x-click="axisXClick" :width="378" :height="270" />
+
+  <span>selected tick: {{ selected }}</span>
 </template>
 
 <script>
@@ -14,7 +16,13 @@ export default {
         staking: 0.3,
         liquid: 0.04,
       },
+      selected: 2,
     };
+  },
+  methods: {
+    axisXClick(selected) {
+      this.selected = selected;
+    },
   },
   components: { MechanismChart },
 };
