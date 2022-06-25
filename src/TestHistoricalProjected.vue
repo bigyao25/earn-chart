@@ -66,10 +66,10 @@ export default {
           { date: dayjs("2022-06-15"), value: 245 },
         ],
       },
-      startValue: 10,
-      todayValue: 100,
-      lastValuePC: 200,
-      lastValuePP: 300,
+      startValue: 1000,
+      todayValue: 10000,
+      lastValuePC: 20000,
+      lastValuePP: 30000,
     };
   },
   mounted() {

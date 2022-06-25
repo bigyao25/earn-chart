@@ -7,16 +7,17 @@
 <script>
 /**
  * TODO：黑夜模式
- * TODO: 小数精度
- * TODO: 最后一天的tip无法显示
- * TODO: 鼠标竖线上下的小菱形
+ * ✅TODO: 小数精度
+ * ✅TODO: 最后一天的tip无法显示
+ * ✅TODO: 鼠标竖线上下的小菱形
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleUtc, scaleLinear } from "d3-scale";
-import { line, curveLinear, curveBasis, curveCardinal, stack, area } from "d3-shape";
+import { line, curveLinear, curveBasis, curveCardinal, stack, area, symbol, symbolSquare } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
+import { format } from "d3-format";
 
 export default {
   // props: ["height", "width", "divide", "value", "breakpoint", "paddingTop", "paddingRight"],
@@ -32,6 +33,7 @@ export default {
         axisLineThickness: 1,
         xTickeValueArea: 30, // x轴标尺文字高度
         yTickeValueArea: 30, // y轴标尺文字高度
+        marginTop: 2, // 顶部margin，dot会突出
         tickeValueFontSize: 12, // 标尺文字大小
         tickeValueFontWeight: 400,
         tickeValueFontWeightBold: 700,
@@ -85,21 +87,21 @@ export default {
         bottomLeft: { x: this.widthes.yTickeValueArea + this.widthes.axisDot, y: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot },
         size: {
           width: this.width - this.widthes.yTickeValueArea - this.widthes.axisDot - this.widthes.axisDot,
-          height: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot - this.widthes.axisDot,
+          height: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot - this.widthes.axisDot - this.widthes.marginTop,
         },
       };
 
       const all = [...this.data.historical, this.data.today, ...this.data.projectedCurrent, ...this.data.projectedPotential];
-      const allDates = all.map(m => dayjs(m.date).toDate());
+      const allDates = all.map(m => dayjs(m.date));
       const allValues = all.map(m => m.value);
       this.xScale = scaleUtc()
-        .domain([allDates[0], allDates[allDates.length - 1]])
+        .domain([allDates[0], allDates[allDates.length - 1].add(2, "hour")])
         .range([this.chartArea.bottomLeft.x, this.chartArea.bottomLeft.x + this.chartArea.size.width]);
 
       const yValueRange = this.makeTike(Math.min(...allValues), Math.max(...allValues));
       this.yScale = scaleLinear()
         .domain([yValueRange[0], yValueRange[2]])
-        .range([this.chartArea.size.height, this.widthes.axisDot / 2]);
+        .range([this.chartArea.size.height, this.widthes.axisDot + this.widthes.marginTop]);
     },
 
     initAreas() {
@@ -411,6 +413,14 @@ export default {
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
 
+      const drawDiamond = (x, y, size, root) => {
+        let diamond = symbol().type(symbolSquare).size(size);
+        root.append("path").attr("d", diamond).attr("fill", this.colors.lineHistorical).attr("transform", `translate(${x},${y}) rotate(45)`);
+      };
+      const size = 15;
+      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - Math.sqrt(size) / 2, size, root);
+      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(size) / 2, size, root);
+
       // shadow area
       root
         .append("rect")
@@ -521,7 +531,8 @@ export default {
 
       tip
         .append("text")
-        .text(`$${tipValue}`)
+        .text(`$${format(".2~s")(tipValue)}`)
+        // .text(`$${tipValue}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 60)
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
