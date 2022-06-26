@@ -80,53 +80,7 @@ export default {
 
       this.initAxis();
 
-      //#region 曲线
-
-      this.myLine = line()
-        .curve(curveCardinal)
-        .x(d => this.xScale(d.date))
-        .y(d => this.yScale(d.value));
-
-      if (this.dataDefi.length > 0) {
-        svg
-          .append("path")
-          .attr("id", "defi-bg")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.defi)
-          .attr("stroke-width", 2)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataDefi));
-      }
-
-      if (this.dataStaking.length > 0) {
-        svg
-          .append("path")
-          .attr("id", "staking-bg")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.staking)
-          .attr("stroke-width", 2)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataStaking));
-      }
-
-      if (this.dataLiquid.length > 0) {
-        svg
-          .append("path")
-          .attr("id", "liquid-bg")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.liquid)
-          .attr("stroke-width", 2)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataLiquid));
-      }
-
-      //#endregion
+      this.draw();
 
       // svg.on("click", this.handleClick);
     },
@@ -181,8 +135,9 @@ export default {
     },
 
     initScale() {
+      const allData = [...this.dataDefi, ...this.dataStaking, ...this.dataLiquid];
       this.xScale = scaleLinear()
-        .domain([this.dataStaking[0].date, this.dataStaking[this.dataStaking.length - 1].date])
+        .domain([Math.min(...allData.map(d => d.date)), Math.max(...allData.map(d => d.date))])
         .range([this.chartArea.bottomLeft.x, this.widthes.axisDot + this.chartArea.size.width]);
 
       this.xAxis = axisBottom(this.xScale)
@@ -193,7 +148,6 @@ export default {
         .tickPadding(25);
 
       const maxApy = Math.max(this.apys.defi ?? -1, this.apys.staking ?? -1, this.apys.liquid ?? -1);
-      console.log("maxApy", maxApy);
       if (maxApy === this.apys.defi) {
         this.yScale = scaleLinear()
           .domain([this.dataDefi[0].value, this.dataDefi[this.dataDefi.length - 1].value])
@@ -239,9 +193,62 @@ export default {
       });
     },
 
+    draw() {
+      this.myLine = line()
+        .curve(curveCardinal)
+        .x(d => this.xScale(d.date))
+        .y(d => this.yScale(d.value));
+
+      const svg = select("#_mechanism_chart");
+      let root = select("#lines");
+      if (root.empty()) root = svg.append("g").attr("id", "lines");
+      else root.selectAll("*").remove();
+
+      if (this.dataDefi.length > 0) {
+        root
+          .append("path")
+          .attr("id", "defi-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.defi)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataDefi));
+      }
+
+      if (this.dataStaking.length > 0) {
+        root
+          .append("path")
+          .attr("id", "staking-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.staking)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataStaking));
+      }
+
+      if (this.dataLiquid.length > 0) {
+        root
+          .append("path")
+          .attr("id", "liquid-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.liquid)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataLiquid));
+      }
+    },
+
     haldleSelection() {
       const svg = select("#_mechanism_chart");
-      svg.selectAll("#staking-selected").remove();
+      let root = select("#lines-selected");
+      if (root.empty()) root = svg.append("g").attr("id", "lines-selected");
+      else root.selectAll("*").remove();
 
       const selected = this.selectedIndex;
       if (selected < 0) return;
@@ -249,7 +256,7 @@ export default {
       let data;
       if (this.dataDefi.length > 0) {
         data = this.dataDefi.filter(m => m.date <= selected);
-        svg
+        root
           .append("path")
           .attr("id", "staking-selected")
           .attr("fill", "none")
@@ -263,7 +270,7 @@ export default {
 
       if (this.dataStaking.length > 0) {
         data = this.dataStaking.filter(m => m.date <= selected);
-        svg
+        root
           .append("path")
           .attr("id", "staking-selected")
           .attr("fill", "none")
@@ -277,7 +284,7 @@ export default {
 
       if (this.dataLiquid.length > 0) {
         data = this.dataLiquid.filter(m => m.date <= selected);
-        svg
+        root
           .append("path")
           .attr("id", "staking-selected")
           .attr("fill", "none")
@@ -290,19 +297,17 @@ export default {
       }
       //#region axis x
 
-      svg.select(".axis-x").selectAll(`.tick`).classed("tick-selected", false);
-      svg
-        .select(".axis-x")
-        .selectAll(`.tick:nth-child(${1 + selected})`)
-        .classed("tick-selected", true);
+      root = svg.select(".axis-x");
+      root.selectAll(`.tick`).classed("tick-selected", false);
+      root.selectAll(`.tick:nth-child(${1 + selected})`).classed("tick-selected", true);
 
-      svg.select("#axis-x-selected-border").remove();
+      root.select("#axis-x-selected-border").remove();
       const offset = selected === 4 ? -4 : 3;
-      svg
+      root
         .append("rect")
         .attr("id", "axis-x-selected-border")
         .attr("x", this.widthes.yTickeValueArea + (this.chartArea.size.width / 4) * selected - this.widthes.tickButtonWidth / 2 + offset)
-        .attr("y", this.chartArea.size.height + this.widthes.xTickeValueArea - this.widthes.tickButtonHeight - 2)
+        .attr("y", this.widthes.xTickeValueArea - this.widthes.tickButtonHeight - 4)
         .attr("width", this.widthes.tickButtonWidth)
         .attr("height", this.widthes.tickButtonHeight)
         .attr("rx", this.widthes.tickButtonHeight / 2)
@@ -323,9 +328,9 @@ export default {
     },
   },
   watch: {
-    apys(n, o) {
-      console.log("watch", n, o);
+    apys() {
       this.init();
+      this.haldleSelection();
     },
   },
 };
