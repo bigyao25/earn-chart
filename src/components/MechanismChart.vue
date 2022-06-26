@@ -6,7 +6,7 @@
 
 <script>
 /**
- * TODO：黑夜模式
+ * ✅TODO：黑夜模式
  * ✅TODO: X轴网格线
  * TODO: 应该传入每年的预计息后资产（加入复利的）
  */
@@ -91,11 +91,7 @@ export default {
 
       svg.selectAll("*").remove();
 
-      svg
-        .append("rect")
-        .attr("width", "100%")
-        .attr("height", "100%")
-        .attr("fill", this.dark ? this.colors.dark.backgroundColor : this.colors.backgroundColor);
+      svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
 
       this.initAxis();
 
@@ -185,6 +181,7 @@ export default {
 
     initAxis() {
       const svg = select("#_mechanism_chart");
+      svg.classed("dark", this.dark);
 
       // x
       const axisX = svg
@@ -198,10 +195,7 @@ export default {
         this.haldleSelection();
         this.$emit("axisXClick", selected);
       });
-      axisX
-        .selectAll(".tick")
-        .select("text")
-        .attr("fill", this.dark ? this.colors.dark.fontColor : this.colors.fontColor);
+      axisX.selectAll(".tick").select("text");
       // 修正x轴两端刻度
       axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
       axisX.selectAll(".tick:nth-child(2)").remove();
@@ -218,11 +212,12 @@ export default {
       for (let i = 1; i < 4; i++) {
         grids
           .append("line")
+          .attr("class", "grid")
           .attr("x1", this.xScale(i))
           .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
           .attr("x2", this.xScale(i))
           .attr("y2", this.widthes.axisDot)
-          .attr("stroke", this.colors.axisLine)
+          // .attr("stroke", this.colors.axisLine)
           .attr("stroke-dasharray", "8,8")
           .attr("stroke-width", 1);
       }
@@ -288,6 +283,7 @@ export default {
       const selected = this.selectedIndex;
       if (selected < 0) return;
 
+      //#region lines
       let data;
       if (this.dataDefi.length > 0) {
         data = this.dataDefi.filter(m => m.date <= selected);
@@ -330,6 +326,8 @@ export default {
           .attr("stroke-opacity", 1)
           .attr("d", this.myLine(data));
       }
+      //#endregion
+
       //#region axis x
 
       root = svg.select("#axis-x");
@@ -347,7 +345,6 @@ export default {
         .attr("height", this.widthes.tickButtonHeight)
         .attr("rx", this.widthes.tickButtonHeight / 2)
         .attr("ry", this.widthes.tickButtonHeight / 2)
-        .attr("fill", this.dark ? this.colors.dark.selectedButtonBackgroundColor : this.colors.selectedButtonBackgroundColor)
         .attr("stroke", "#925BCA")
         .attr("stroke-width", 1);
 
@@ -375,15 +372,21 @@ export default {
 
 <style lang="less">
 #_mechanism_chart {
+  #bg {
+    fill: #ffffff;
+  }
   #axis-x {
     .domain {
       stroke: #dddcea;
+    }
+    #axis-x-selected-border {
+      fill: white;
     }
     .tick {
       text {
         font-family: "Mulish Bold";
         font-size: 14px;
-        // fill: #2c2236;
+        fill: #2c2236;
         cursor: pointer;
       }
     }
@@ -393,10 +396,48 @@ export default {
       }
     }
   }
-
   #axis-y {
     .domain {
       stroke: #dddcea;
+    }
+  }
+  #grids {
+    .grid {
+      stroke: #dddcea;
+    }
+  }
+
+  &.dark {
+    #bg {
+      fill: #140b22;
+    }
+    #axis-x {
+      .domain {
+        stroke: #433b71;
+      }
+      #axis-x-selected-border {
+        fill: #cb9ff7;
+      }
+      .tick {
+        text {
+          fill: #ffffff;
+        }
+      }
+      .tick-selected {
+        text {
+          fill: #140b22;
+        }
+      }
+    }
+    #axis-y {
+      .domain {
+        stroke: #433b71;
+      }
+    }
+    #grids {
+      .grid {
+        stroke: #433b71;
+      }
     }
   }
 }
