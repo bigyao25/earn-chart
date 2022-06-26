@@ -7,7 +7,7 @@
 
 <script>
 import dayjs from "dayjs";
-import { randomRange } from "./utils/utils";
+import { randomRange, getRewardOneDay, getProfitByApy } from "./utils/utils";
 import MechanismChart from "./components/MechanismChart.vue";
 
 export default {
@@ -20,6 +20,21 @@ export default {
       },
       selected: 2,
     };
+  },
+  mounted() {
+    const tieredApy = [
+      { tiered: { start: 0, end: 100 }, apy: 0.1 },
+      { tiered: { start: 100, end: 1000 }, apy: 0.2 },
+      { tiered: { start: 1000, end: Number.MAX_VALUE }, apy: 0.5 },
+    ];
+    console.log(`1day-reward-1`, getRewardOneDay(1, tieredApy));
+    console.log(`1day-reward-10000`, getRewardOneDay(10000, tieredApy));
+    console.log(`profit-1*1`, getProfitByApy({ principal: 1, apyTiers: tieredApy, compound: false, days: 1 }));
+    console.log(`profit-1*365`, getProfitByApy({ principal: 1, apyTiers: tieredApy, compound: false, days: 365 }));
+    console.log(`profit-1*365c`, getProfitByApy({ principal: 1, apyTiers: tieredApy, compound: true, days: 365 }));
+    console.log(`profit-10000*1`, getProfitByApy({ principal: 10000, apyTiers: tieredApy, compound: false, days: 1 }));
+    console.log(`profit-10000*365`, getProfitByApy({ principal: 10000, apyTiers: tieredApy, compound: false, days: 365 }));
+    console.log(`profit-10000*365c`, getProfitByApy({ principal: 10000, apyTiers: tieredApy, compound: true, days: 365 }));
   },
   methods: {
     axisXClick(selected) {
@@ -42,7 +57,6 @@ export default {
       }
 
       this.apys = apys;
-      console.log("test", this.apys);
     },
   },
   components: { MechanismChart },
