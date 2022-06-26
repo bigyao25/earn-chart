@@ -7,10 +7,12 @@
 <script>
 /**
  * TODO：黑夜模式
- * TODO: Y轴刻度+网格线
+ * ✅TODO: Y轴刻度+网格线
  * ✅TODO: 小数精度
  * ✅TODO: 最后一天的tip无法显示
  * ✅TODO: 鼠标竖线上下的小菱形
+ *
+ * BUG: 30000级别的图表，给了300级别数据重新render时，显示错误
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
@@ -34,7 +36,7 @@ export default {
         axisLineThickness: 1,
         xTickeValueArea: 30, // x轴标尺文字高度
         yTickeValueArea: 30, // y轴标尺文字高度
-        marginTop: 2, // 顶部margin，dot会突出
+        marginTop: 8, // 顶部margin，dot会突出
         tickeValueFontSize: 12, // 标尺文字大小
         tickeValueFontWeight: 400,
         tickeValueFontWeightBold: 700,
@@ -102,8 +104,8 @@ export default {
 
       const yValueRange = this.makeTike(Math.min(...allValues), Math.max(...allValues));
       this.yScale = scaleLinear()
-        .domain([yValueRange[0], yValueRange[2]])
-        .range([this.chartArea.size.height, this.widthes.axisDot + this.widthes.marginTop]);
+        .domain([yValueRange[0], yValueRange[yValueRange.length - 1]])
+        .range([this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height, this.widthes.marginTop + this.widthes.axisDot]);
     },
 
     initAreas() {
@@ -124,6 +126,142 @@ export default {
       const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
       this.rightSeries = rightStack(rightStackData);
       this.rightFill = ["transparent", "url(#gradientPC)", "url(#gradientPP)"];
+    },
+
+    initAxis() {
+      const svg = select("#_hp_chart");
+      if (svg.select("#axis").empty()) svg.append("g").attr("id", "axis");
+      const root = svg.select("#axis");
+      root.selectAll("*").remove();
+
+      /**
+       * y
+       */
+      root
+        .append("line")
+        .attr("x1", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+        .attr("y1", this.widthes.axisDot)
+        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+        .attr("y2", this.widthes.marginTop + this.chartArea.size.height + this.widthes.axisDot)
+        .attr("stroke", this.colors.axisLine)
+        .attr("marker-end", "url(#axisDot)")
+        .attr("marker-start", "url(#axisDot)");
+
+      const allValues = this.allData.map(m => m.value);
+      const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
+      console.log(yTicks.map(d => d.toNumber()));
+      yTicks.forEach(n => {
+        root
+          .append("line")
+          .attr("x1", this.chartArea.bottomLeft.x)
+          .attr("y1", this.yScale(n.toNumber()))
+          .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+          .attr("y2", this.yScale(n.toNumber()))
+          .attr("stroke", this.colors.axisLine)
+          .attr("stroke-dasharray", "8,8")
+          .attr("stroke-width", 1);
+        root
+          .append("text")
+          .attr("x", 0)
+          .attr("y", this.yScale(n.toNumber()))
+          .text(`$${format(".2~s")(n.toNumber()).toUpperCase()}`)
+          .attr("text-anchor", "start")
+          .attr("dominant-baseline", "middle")
+          .attr("font-family", "Mulish")
+          .attr("font-size", this.widthes.tickeValueFontSize)
+          .attr("font-weight", this.widthes.tickeValueFontWeight)
+          .attr("fill", this.colors.fontTickValue);
+      });
+
+      /**
+       * x
+       */
+      // 轴线
+      root
+        .append("line")
+        .attr("x1", this.chartArea.bottomLeft.x)
+        .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
+        .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        // .attr("width", 40)
+        .attr("stroke", this.colors.axisLine)
+        .attr("marker-end", "url(#axisDot)")
+        .attr("marker-start", "url(#axisDot)");
+      // 中点
+      root
+        .append("line")
+        .attr("x1", this.xScale(this.data.today.date) - 65)
+        .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.xScale(this.data.today.date))
+        .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        .attr("stroke", this.colors.background)
+        .attr("stroke-width", 1.2)
+        .attr("marker-end", "url(#axisDot)");
+      root
+        .append("line")
+        .attr("x1", this.xScale(this.data.today.date))
+        .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        .attr("x2", this.xScale(this.data.today.date) + 65)
+        .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+        .attr("stroke", this.colors.background)
+        .attr("stroke-width", 1.2)
+        .attr("marker-start", "url(#axisDot)");
+      // Historical
+      root
+        .append("text")
+        .text("Historical")
+        .attr("x", this.xScale(this.data.today.date) - 60)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
+        .attr("filter", "url(#solid)")
+        .attr("font-family", "Mulish")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("font-weight", this.widthes.tickeValueFontWeight)
+        .attr("fill", this.colors.fontHistorical);
+      // Projected
+      root
+        .append("text")
+        .text("Projected")
+        .attr("x", this.xScale(this.data.today.date) + 8)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
+        // .attr("text-anchor", "middle")
+        .attr("filter", "url(#solid)")
+        .attr("font-family", "Mulish")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("font-weight", this.widthes.tickeValueFontWeight)
+        .attr("fill", this.colors.fontProjected);
+      // x 文字
+      const dateToday = this.data.today.date;
+      const dateMin = this.data.historical[0].date;
+      const dateMax = this.data.projectedPotential.slice(-1)[0].date;
+      root
+        .append("text")
+        .text(dateMin.format("MMM D, YYYY"))
+        .attr("id", "x-tick-min")
+        .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
+        .attr("y", this.height - this.widthes.axisDot)
+        .attr("font-family", "Mulish Bold")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("fill", this.colors.fontTickValue);
+      root
+        .append("text")
+        .text(dateToday.format("MMM D, YYYY"))
+        .attr("id", "x-tick-today")
+        .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
+        .attr("y", this.height - this.widthes.axisDot)
+        .attr("font-family", "Mulish Bold")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("text-anchor", "middle")
+        .attr("fill", this.colors.fontTickValue);
+      root
+        .append("text")
+        .text(dateMax.format("MMM D, YYYY"))
+        .attr("id", "x-tick-max")
+        .attr("x", this.width)
+        .attr("y", this.height - this.widthes.axisDot)
+        .attr("text-anchor", "end")
+        .attr("font-family", "Mulish Bold")
+        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("fill", this.colors.fontTickValue);
     },
 
     init() {
@@ -167,136 +305,7 @@ export default {
       gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
       //#endregion
 
-      //#region 坐标轴
-      /**
-       * y
-       */
-      root = svg.append("g");
-      root
-        .append("line")
-        .attr("x1", this.chartArea.bottomLeft.x + this.chartArea.size.width)
-        .attr("y1", this.widthes.axisDot)
-        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
-        .attr("y2", this.chartArea.size.height + this.widthes.axisDot)
-        .attr("stroke", this.colors.axisLine)
-        .attr("marker-end", "url(#axisDot)")
-        .attr("marker-start", "url(#axisDot)");
-
-      const allValues = this.allData.map(m => m.value);
-      const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
-      yTicks.forEach(n => {
-        root
-          .append("line")
-          .attr("x1", this.chartArea.bottomLeft.x)
-          .attr("y1", this.yScale(n.toNumber()))
-          .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
-          .attr("y2", this.yScale(n.toNumber()))
-          .attr("stroke", this.colors.axisLine)
-          .attr("stroke-dasharray", "8,8")
-          .attr("stroke-width", 1);
-        root
-          .append("text")
-          .attr("x", 0)
-          .attr("y", this.yScale(n.toNumber()))
-          .text("$" + format(".2~s")(n.toNumber()).toUpperCase())
-          .attr("text-anchor", "start")
-          .attr("dominant-baseline", "middle")
-          .attr("font-family", "Mulish")
-          .attr("font-size", this.widthes.tickeValueFontSize)
-          .attr("font-weight", this.widthes.tickeValueFontWeight)
-          .attr("fill", this.colors.fontTickValue);
-      });
-
-      /**
-       * x
-       */
-      // 轴线
-      root
-        .append("line")
-        .attr("x1", this.chartArea.bottomLeft.x)
-        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
-        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
-        // .attr("width", 40)
-        .attr("stroke", this.colors.axisLine)
-        .attr("marker-end", "url(#axisDot)")
-        .attr("marker-start", "url(#axisDot)");
-      // 中点
-      root
-        .append("line")
-        .attr("x1", this.xScale(this.data.today.date) - 65)
-        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("x2", this.xScale(this.data.today.date))
-        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke", this.colors.background)
-        .attr("stroke-width", 1.2)
-        .attr("marker-end", "url(#axisDot)");
-      root
-        .append("line")
-        .attr("x1", this.xScale(this.data.today.date))
-        .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("x2", this.xScale(this.data.today.date) + 65)
-        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke", this.colors.background)
-        .attr("stroke-width", 1.2)
-        .attr("marker-start", "url(#axisDot)");
-      // Historical
-      root
-        .append("text")
-        .text("Historical")
-        .attr("x", this.xScale(this.data.today.date) - 60)
-        .attr("y", this.widthes.axisDot + this.chartArea.size.height + 4)
-        .attr("filter", "url(#solid)")
-        .attr("font-family", "Mulish")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight)
-        .attr("fill", this.colors.fontHistorical);
-      // Projected
-      root
-        .append("text")
-        .text("Projected")
-        .attr("x", this.xScale(this.data.today.date) + 8)
-        .attr("y", this.widthes.axisDot + this.chartArea.size.height + 4)
-        // .attr("text-anchor", "middle")
-        .attr("filter", "url(#solid)")
-        .attr("font-family", "Mulish")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight)
-        .attr("fill", this.colors.fontProjected);
-      // x 文字
-      const dateToday = this.data.today.date;
-      const dateMin = this.data.historical[0].date;
-      const dateMax = this.data.projectedPotential.slice(-1)[0].date;
-      root
-        .append("text")
-        .text(dateMin.format("MMM D, YYYY"))
-        .attr("id", "x-ticke-min")
-        .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
-        .attr("y", this.height - this.widthes.axisDot)
-        .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("fill", this.colors.fontTickValue);
-      root
-        .append("text")
-        .text(dateToday.format("MMM D, YYYY"))
-        .attr("id", "x-ticke-today")
-        .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
-        .attr("y", this.height - this.widthes.axisDot)
-        .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("text-anchor", "middle")
-        .attr("fill", this.colors.fontTickValue);
-      root
-        .append("text")
-        .text(dateMax.format("MMM D, YYYY"))
-        .attr("id", "x-ticke-max")
-        .attr("x", this.width)
-        .attr("y", this.height - this.widthes.axisDot)
-        .attr("text-anchor", "end")
-        .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("fill", this.colors.fontTickValue);
-      //#endregion
+      this.initAxis();
 
       //#region area
 
@@ -594,12 +603,18 @@ export default {
       return fixed;
     },
     makeTike(min, max) {
+      min = Decimal(min);
       // min = Decimal(0);// y轴是否总是从0开始
+      max = Decimal(max);
+
       const fixedMin = this.makeFrandly(Decimal(min), false),
         fixedMax = this.makeFrandly(Decimal(max), true);
-      const fixedMid = this.makeFrandly(Decimal.add(max, min).dividedBy(2), true);
 
-      return [fixedMin, fixedMid, fixedMax];
+      // const fixedMid = this.makeFrandly(Decimal.add(max, min).dividedBy(2), true);
+      // return [fixedMin, fixedMid, fixedMax];
+      const fixedMid1 = this.makeFrandly(min.add(max.sub(min).dividedBy(3)), true);
+      const fixedMid2 = this.makeFrandly(min.add(max.sub(min).dividedBy(3).mul(2)), true);
+      return [fixedMin, fixedMid1, fixedMid2, fixedMax];
     },
   },
 
@@ -612,15 +627,16 @@ export default {
       this.projectedPotentialData = [this.data.today, ...this.data.projectedPotential];
 
       this.initScale();
+      this.initAxis();
 
       //#region 标尺文字
 
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
       const dateMax = this.data.projectedPotential.slice(-1)[0].date;
-      select("#x-ticke-min").text(dateMin.format("MMM D, YYYY"));
-      select("#x-ticke-today").text(dateToday.format("MMM D, YYYY"));
-      select("#x-ticke-max").text(dateMax.format("MMM D, YYYY"));
+      select("#x-tick-min").text(dateMin.format("MMM D, YYYY"));
+      select("#x-tick-today").text(dateToday.format("MMM D, YYYY"));
+      select("#x-tick-max").text(dateMax.format("MMM D, YYYY"));
 
       //#endregion
 
