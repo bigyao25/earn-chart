@@ -1,8 +1,14 @@
 <template>
-  <div>
-    <TestMechanism />
-    <TestHistoricalProjected />
-    <Test1></Test1>
+  <div class="container">
+    <div class="card bg-red">
+      <TestMechanism />
+    </div>
+    <div class="card bg-green">
+      <TestHistoricalProjected />
+    </div>
+    <div class="card bg-gray">
+      <Test1></Test1>
+    </div>
   </div>
 </template>
 
@@ -21,7 +27,7 @@ export default {
 };
 </script>
 
-<style>
+<style lang="less" scoped>
 /* mulish -latin */
 @font-face {
   font-family: "Mulish";
@@ -67,8 +73,30 @@ export default {
   src: url(/fonts/mulish-v7-latin-700.woff?t=1641532682023) format("woff"), url(./fonts/mulish-v7-latin-700.woff2?t=1641532682023) format("woff2");
 }
 
-div {
+.container {
   display: flex;
   flex-direction: column;
+
+  .card {
+    display: flex;
+    margin: 5px;
+    padding: 5px;
+  }
+
+  .bg-red {
+    background-color: rgba(255, 0, 0, 0.1);
+  }
+
+  .bg-green {
+    background-color: rgba(0, 255, 0, 0.1);
+  }
+
+  .bg-blue {
+    background-color: rgba(0, 0, 255, 0.1);
+  }
+
+  .bg-gray {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
 </style>

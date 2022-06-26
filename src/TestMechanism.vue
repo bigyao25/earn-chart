@@ -1,8 +1,13 @@
 <template>
-  <MechanismChart :apys="apys" :selected="selected" @axis-x-click="axisXClick" :width="378" :height="270" />
+  <div class="body">
+    <MechanismChart :apys="apys" :selected="selected" @axis-x-click="axisXClick" :width="378" :height="270" :dark="dark" />
 
-  <button @click="handleChange">Change Data</button>
-  <span>Selected Tick: {{ selected }}</span>
+    <div class="right">
+      <button @click="handleChange">Change Data</button>
+      <span>Selected Tick: {{ selected }}</span>
+      <button @click="handleChangeMode">Change Mode</button>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -19,6 +24,7 @@ export default {
         liquid: 0.04,
       },
       selected: 2,
+      dark: false,
     };
   },
   mounted() {
@@ -58,9 +64,26 @@ export default {
 
       this.apys = apys;
     },
+    handleChangeMode() {
+      this.dark = !this.dark;
+    },
   },
   components: { MechanismChart },
 };
 </script>
 
-<style></style>
+<style lang="less" scoped>
+.body {
+  display: flex;
+
+  .right {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
+
+    button {
+      width: 100px;
+    }
+  }
+}
+</style>

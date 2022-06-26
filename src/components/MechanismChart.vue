@@ -7,7 +7,7 @@
 <script>
 /**
  * TODO：黑夜模式
- * TODO: X轴网格线
+ * ✅TODO: X轴网格线
  * TODO: 应该传入每年的预计息后资产（加入复利的）
  */
 import dayjs from "dayjs";
@@ -25,6 +25,7 @@ export default {
     apys: Object,
     selected: Number,
     onAxisClick: Function,
+    dark: { type: Boolean, default: false },
   },
 
   data() {
@@ -41,6 +42,18 @@ export default {
         tickButtonHeight: 22,
       },
       colors: {
+        fontColor: "#2C2236",
+        axisLine: "#DDDCEA",
+        selectedButtonFontColor: "#925BCA",
+        selectedButtonBackgroundColor: "white",
+        backgroundColor: "white",
+        dark: {
+          fontColor: "#FFFFFF",
+          axisLine: "#433B71",
+          selectedButtonFontColor: "#140B22",
+          selectedButtonBackgroundColor: "#CB9FF7",
+          backgroundColor: "#140B22",
+        },
         defi: "#6884DC",
         staking: "#925BCA",
         liquid: "#EEAD00",
@@ -77,6 +90,12 @@ export default {
       // .on("pointermove", pointermoved);
 
       svg.selectAll("*").remove();
+
+      svg
+        .append("rect")
+        .attr("width", "100%")
+        .attr("height", "100%")
+        .attr("fill", this.dark ? this.colors.dark.backgroundColor : this.colors.backgroundColor);
 
       this.initAxis();
 
@@ -167,30 +186,46 @@ export default {
     initAxis() {
       const svg = select("#_mechanism_chart");
 
+      // x
       const axisX = svg
         .append("g")
         .attr("id", "axis-x")
         .attr("transform", `translate(0, ${this.widthes.axisDot + this.chartArea.size.height})`)
         .call(this.xAxis);
+      axisX.selectAll(".tick").on("click", event => {
+        const selected = parseInt(event.target.innerHTML.substring(0, 1));
+        this.selectedIndex = selected;
+        this.haldleSelection();
+        this.$emit("axisXClick", selected);
+      });
+      axisX
+        .selectAll(".tick")
+        .select("text")
+        .attr("fill", this.dark ? this.colors.dark.fontColor : this.colors.fontColor);
+      // 修正x轴两端刻度
+      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
+      axisX.selectAll(".tick:nth-child(2)").remove();
+
+      // y
       svg
         .append("g")
         .attr("id", "axis-y")
         .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
         .call(this.yAxis);
 
-      // 修正x轴两端刻度
-      // axisX.selectAll(".tick:nth-child(2)").attr("transform", "translate(8, 0)");
-      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
-      axisX.selectAll(".tick:nth-child(2)").remove();
-
-      axisX.selectAll(".tick").on("click", event => {
-        const selected = parseInt(event.target.innerHTML.substring(0, 1));
-        this.selectedIndex = selected;
-        this.haldleSelection();
-
-        // if (onAxisClick) onAxisClick(selected);
-        this.$emit("axisXClick", selected);
-      });
+      // grid
+      const grids = svg.append("g").attr("id", "grids");
+      for (let i = 1; i < 4; i++) {
+        grids
+          .append("line")
+          .attr("x1", this.xScale(i))
+          .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
+          .attr("x2", this.xScale(i))
+          .attr("y2", this.widthes.axisDot)
+          .attr("stroke", this.colors.axisLine)
+          .attr("stroke-dasharray", "8,8")
+          .attr("stroke-width", 1);
+      }
     },
 
     draw() {
@@ -304,7 +339,7 @@ export default {
       root.select("#axis-x-selected-border").remove();
       const offset = selected === 4 ? -4 : 3;
       root
-        .append("rect")
+        .insert("rect", "g")
         .attr("id", "axis-x-selected-border")
         .attr("x", this.widthes.yTickeValueArea + (this.chartArea.size.width / 4) * selected - this.widthes.tickButtonWidth / 2 + offset)
         .attr("y", this.widthes.xTickeValueArea - this.widthes.tickButtonHeight - 4)
@@ -312,7 +347,7 @@ export default {
         .attr("height", this.widthes.tickButtonHeight)
         .attr("rx", this.widthes.tickButtonHeight / 2)
         .attr("ry", this.widthes.tickButtonHeight / 2)
-        .attr("fill", "rgba(0,0,0,0)")
+        .attr("fill", this.dark ? this.colors.dark.selectedButtonBackgroundColor : this.colors.selectedButtonBackgroundColor)
         .attr("stroke", "#925BCA")
         .attr("stroke-width", 1);
 
@@ -321,14 +356,16 @@ export default {
 
     handleClick(event) {
       const selected = Math.ceil(this.xScale.invert(event.x));
-      // this.haldleSelection(selected);
       this.selectedIndex = selected;
-      console.log(this.selectedIndex);
       this.haldleSelection();
     },
   },
   watch: {
     apys() {
+      this.init();
+      this.haldleSelection();
+    },
+    dark() {
       this.init();
       this.haldleSelection();
     },
@@ -346,7 +383,7 @@ export default {
       text {
         font-family: "Mulish Bold";
         font-size: 14px;
-        fill: #2c2236;
+        // fill: #2c2236;
         cursor: pointer;
       }
     }

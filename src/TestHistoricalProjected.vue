@@ -1,30 +1,34 @@
 <template>
-  <HistoricalProjectedChart :data="data" :width="400" :height="220" />
-  <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
+  <div class="body">
+    <HistoricalProjectedChart :data="data" :width="400" :height="220" />
+    <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
-  <div class="days">
-    <button v-on:click="handleClick1W">1W</button>
-    <button v-on:click="handleClick1M">1M</button>
-    <button v-on:click="handleClick3M">3M</button>
-    <button v-on:click="handleClick1Y">1Y</button>
-  </div>
+    <div class="right">
+      <div class="days">
+        <button v-on:click="handleClick1W">1W</button>
+        <button v-on:click="handleClick1M">1M</button>
+        <button v-on:click="handleClick3M">3M</button>
+        <button v-on:click="handleClick1Y">1Y</button>
+      </div>
 
-  <div class="values">
-    <div>
-      start value:
-      <input type="text" v-model="startValue" />
-    </div>
-    <div>
-      today value:
-      <input type="text" v-model="todayValue" />
-    </div>
-    <div>
-      last project current value:
-      <input type="text" v-model="lastValuePC" />
-    </div>
-    <div>
-      last project potential value:
-      <input type="text" v-model="lastValuePP" />
+      <div class="values">
+        <div>
+          start value:
+          <input type="text" v-model="startValue" />
+        </div>
+        <div>
+          today value:
+          <input type="text" v-model="todayValue" />
+        </div>
+        <div>
+          last project current value:
+          <input type="text" v-model="lastValuePC" />
+        </div>
+        <div>
+          last project potential value:
+          <input type="text" v-model="lastValuePP" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -141,18 +145,27 @@ export default {
 };
 </script>
 
-<style scoped>
-.days {
+<style lang="less" scoped>
+.body {
   display: flex;
-  flex-direction: row;
-  width: 100vw;
-}
 
-.days button {
-  width: 60px;
-}
+  .right {
+    display: flex;
+    flex-direction: column;
+    margin-left: 10px;
 
-.values div {
-  width: 400px;
+    .days {
+      display: flex;
+      flex-direction: row;
+    }
+
+    .days button {
+      width: 60px;
+    }
+
+    .values div {
+      width: 400px;
+    }
+  }
 }
 </style>
