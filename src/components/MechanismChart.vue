@@ -42,18 +42,7 @@ export default {
         tickButtonHeight: 22,
       },
       colors: {
-        fontColor: "#2C2236",
         axisLine: "#DDDCEA",
-        selectedButtonFontColor: "#925BCA",
-        selectedButtonBackgroundColor: "white",
-        backgroundColor: "white",
-        dark: {
-          fontColor: "#FFFFFF",
-          axisLine: "#433B71",
-          selectedButtonFontColor: "#140B22",
-          selectedButtonBackgroundColor: "#CB9FF7",
-          backgroundColor: "#140B22",
-        },
         defi: "#6884DC",
         staking: "#925BCA",
         liquid: "#EEAD00",
@@ -230,7 +219,7 @@ export default {
         .y(d => this.yScale(d.value));
 
       const svg = select("#_mechanism_chart");
-      let root = select("#lines");
+      let root = svg.select("#lines");
       if (root.empty()) root = svg.append("g").attr("id", "lines");
       else root.selectAll("*").remove();
 
@@ -331,9 +320,6 @@ export default {
       //#region axis x
 
       root = svg.select("#axis-x");
-      root.selectAll(`.tick`).classed("tick-selected", false);
-      root.selectAll(`.tick:nth-child(${1 + selected})`).classed("tick-selected", true);
-
       root.select("#axis-x-selected-border").remove();
       const offset = selected === 4 ? -4 : 3;
       root
@@ -347,6 +333,9 @@ export default {
         .attr("ry", this.widthes.tickButtonHeight / 2)
         .attr("stroke", "#925BCA")
         .attr("stroke-width", 1);
+
+      root.selectAll(`.tick`).classed("tick-selected", false);
+      root.selectAll(`.tick:nth-child(${2 + selected})`).classed("tick-selected", true);
 
       //#endregion
     },

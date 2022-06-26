@@ -1,6 +1,6 @@
 <template>
   <div class="body">
-    <HistoricalProjectedChart :data="data" :width="400" :height="220" />
+    <HistoricalProjectedChart :data="data" :width="378" :height="270" :dark="dark" />
     <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
     <div class="right">
@@ -29,6 +29,8 @@
           <input type="text" v-model="lastValuePP" />
         </div>
       </div>
+
+      <button @click="handleChangeMode">Change Mode</button>
     </div>
   </div>
 </template>
@@ -75,6 +77,7 @@ export default {
       todayValue: 10000,
       lastValuePC: 20000,
       lastValuePP: 30000,
+      dark: false,
     };
   },
   mounted() {
@@ -92,6 +95,10 @@ export default {
     },
     handleClick1Y() {
       this.fillData(365);
+    },
+
+    handleChangeMode() {
+      this.dark = !this.dark;
     },
 
     fillData(length) {
@@ -165,6 +172,10 @@ export default {
 
     .values div {
       width: 400px;
+    }
+
+    button {
+      width: 100px;
     }
   }
 }

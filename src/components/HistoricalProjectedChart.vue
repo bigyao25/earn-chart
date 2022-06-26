@@ -6,7 +6,7 @@
 
 <script>
 /**
- * TODO：黑夜模式
+ * ✅TODO：黑夜模式
  * ✅TODO: Y轴刻度+网格线
  * ✅TODO: 小数精度
  * ✅TODO: 最后一天的tip无法显示
@@ -28,6 +28,7 @@ export default {
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
     data: Object,
+    dark: { type: Boolean, default: false },
   },
   data() {
     return {
@@ -44,7 +45,7 @@ export default {
         // tipHeight: 60,
       },
       colors: {
-        background: "white",
+        background: "#FFFFFF",
         axisLine: "#DDDCEA",
         fontTickValue: "#565672",
         fontHistorical: "#55AA00",
@@ -53,6 +54,9 @@ export default {
         lineProjectedCurrent: "#6884DC",
         lineProjectedPotential: "#925BCA",
         fontTip: "#2C2236",
+        dark: {
+          background: "#140b22",
+        },
       },
       historicalData: [...this.data.historical, this.data.today],
       todayData: this.data.today,
@@ -134,22 +138,18 @@ export default {
       const root = svg.select("#axis");
       root.selectAll("*").remove();
 
-      /**
-       * y
-       */
+      //#region y
       root
         .append("line")
         .attr("x1", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y1", this.widthes.axisDot)
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.widthes.marginTop + this.chartArea.size.height + this.widthes.axisDot)
-        .attr("stroke", this.colors.axisLine)
         .attr("marker-end", "url(#axisDot)")
         .attr("marker-start", "url(#axisDot)");
 
       const allValues = this.allData.map(m => m.value);
       const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
-      console.log(yTicks.map(d => d.toNumber()));
       yTicks.forEach(n => {
         root
           .append("line")
@@ -157,7 +157,6 @@ export default {
           .attr("y1", this.yScale(n.toNumber()))
           .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
           .attr("y2", this.yScale(n.toNumber()))
-          .attr("stroke", this.colors.axisLine)
           .attr("stroke-dasharray", "8,8")
           .attr("stroke-width", 1);
         root
@@ -169,13 +168,11 @@ export default {
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish")
           .attr("font-size", this.widthes.tickeValueFontSize)
-          .attr("font-weight", this.widthes.tickeValueFontWeight)
-          .attr("fill", this.colors.fontTickValue);
+          .attr("font-weight", this.widthes.tickeValueFontWeight);
       });
+      //#endregion
 
-      /**
-       * x
-       */
+      //#region x
       // 轴线
       root
         .append("line")
@@ -184,51 +181,49 @@ export default {
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
         // .attr("width", 40)
-        .attr("stroke", this.colors.axisLine)
         .attr("marker-end", "url(#axisDot)")
         .attr("marker-start", "url(#axisDot)");
       // 中点
       root
         .append("line")
+        .attr("class", "axis-center-line")
         .attr("x1", this.xScale(this.data.today.date) - 65)
         .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
         .attr("x2", this.xScale(this.data.today.date))
         .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-end", "url(#axisDot)");
       root
         .append("line")
+        .attr("class", "axis-center-line")
         .attr("x1", this.xScale(this.data.today.date))
         .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
         .attr("x2", this.xScale(this.data.today.date) + 65)
         .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke", this.colors.background)
         .attr("stroke-width", 1.2)
         .attr("marker-start", "url(#axisDot)");
       // Historical
       root
         .append("text")
         .text("Historical")
+        .attr("class", "text-historical")
         .attr("x", this.xScale(this.data.today.date) - 60)
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
         .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight)
-        .attr("fill", this.colors.fontHistorical);
+        .attr("font-weight", this.widthes.tickeValueFontWeight);
       // Projected
       root
         .append("text")
         .text("Projected")
+        .attr("class", "text-projected")
         .attr("x", this.xScale(this.data.today.date) + 8)
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
-        // .attr("text-anchor", "middle")
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
         .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight)
-        .attr("fill", this.colors.fontProjected);
+        .attr("font-weight", this.widthes.tickeValueFontWeight);
       // x 文字
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
@@ -240,8 +235,7 @@ export default {
         .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("fill", this.colors.fontTickValue);
+        .attr("font-size", this.widthes.tickeValueFontSize);
       root
         .append("text")
         .text(dateToday.format("MMM D, YYYY"))
@@ -250,8 +244,7 @@ export default {
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
         .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("text-anchor", "middle")
-        .attr("fill", this.colors.fontTickValue);
+        .attr("text-anchor", "middle");
       root
         .append("text")
         .text(dateMax.format("MMM D, YYYY"))
@@ -260,8 +253,9 @@ export default {
         .attr("y", this.height - this.widthes.axisDot)
         .attr("text-anchor", "end")
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("fill", this.colors.fontTickValue);
+        .attr("font-size", this.widthes.tickeValueFontSize);
+
+      //#endregion
     },
 
     init() {
@@ -269,12 +263,15 @@ export default {
       this.initAreas();
 
       const svg = select("#_hp_chart");
+      svg.classed("dark", this.dark);
+      console.log("dark", this.dark);
       svg.selectAll("*").remove();
 
       var defs = svg.append("defs");
       var root;
 
       //#region defs
+
       // 坐标轴圆点
       var arrowMarker = defs
         .append("marker")
@@ -287,23 +284,32 @@ export default {
         .attr("refY", this.widthes.axisDot)
         .attr("orient", "auto");
       arrowMarker.append("circle").attr("cx", this.widthes.axisDot).attr("cy", this.widthes.axisDot).attr("r", this.widthes.axisDot).attr("fill", this.colors.axisLine);
-      // 白色背景
+      // 背景色遮罩
       var whiteFilter = defs.append("filter").attr("x", 0).attr("y", 0).attr("width", 1).attr("height", 1).attr("id", "solid");
-      whiteFilter.append("feFlood").attr("flood-color", this.colors.background);
+      whiteFilter.append("feFlood").attr("flood-color", this.dark ? this.colors.dark.background : this.colors.background);
       whiteFilter.append("feComposite").attr("in", "SourceGraphic").attr("operator", "atop");
 
       const gradientH = defs.append("linearGradient").attr("id", "gradientH").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
-      gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
+      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
+      // gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
+      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.3)");
+      gradientH.append("stop").attr("offset", "90%").attr("stop-color", "rgba(85, 170, 0, 0)");
 
       const gradientPC = defs.append("linearGradient").attr("id", "gradientPC").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
-      gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
+      // gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
+      // gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
+      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.25)");
+      gradientPC.append("stop").attr("offset", "90%").attr("stop-color", "rgba(110, 135, 215, 0)");
 
       const gradientPP = defs.append("linearGradient").attr("id", "gradientPP").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
-      gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
+      // gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
+      // gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
+      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.15)");
+      gradientPP.append("stop").attr("offset", "90%").attr("stop-color", "rgba(146, 91, 202, 0)");
+
       //#endregion
+
+      svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
 
       this.initAxis();
 
@@ -342,9 +348,9 @@ export default {
 
       //#endregion
 
-      //#region 曲线
+      //#region lines
 
-      root = svg.append("g");
+      root = svg.append("g").attr("id", "lines");
 
       // historical
       this.lineH = line()
@@ -387,14 +393,13 @@ export default {
       //#region today
 
       // line
-      root = svg.append("g");
+      root = svg.append("g").attr("id", "today");
       root
         .append("line")
         .attr("x1", this.xScale(this.data.today.date))
         .attr("y1", this.widthes.axisDot)
         .attr("x2", this.xScale(this.data.today.date))
         .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke", this.colors.axisLine)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
 
@@ -450,17 +455,17 @@ export default {
         let diamond = symbol().type(symbolSquare).size(size);
         root.append("path").attr("d", diamond).attr("fill", this.colors.lineHistorical).attr("transform", `translate(${x},${y}) rotate(45)`);
       };
-      const size = 15;
-      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - Math.sqrt(size) / 2, size, root);
-      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(size) / 2, size, root);
+      const sizeDiamond = 15;
+      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y, sizeDiamond, root);
+      drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(sizeDiamond) / 2, sizeDiamond, root);
 
       // shadow area
       root
         .append("rect")
         .attr("x", this.xScale(date))
-        .attr("y", this.widthes.axisDot)
+        .attr("y", this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(sizeDiamond) / 2)
         .attr("width", this.xScale(date.add(1, "day")) - this.xScale(date))
-        .attr("height", this.chartArea.size.height)
+        .attr("height", this.chartArea.size.height + Math.sqrt(sizeDiamond) / 2)
         .attr("fill", "rgba(85, 170, 0, 0.1)");
 
       // dot
@@ -619,8 +624,7 @@ export default {
   },
 
   watch: {
-    data: function (n, o) {
-      // console.log("data changed.");
+    data: function () {
       this.historicalData = [...this.data.historical, this.data.today];
       this.todayData = this.data.today;
       this.projectedCurrentData = [this.data.today, ...this.data.projectedCurrent];
@@ -690,13 +694,65 @@ export default {
         .attr("data-value", this.data.today.value);
       //#endregion
     },
+    dark: function () {
+      this.init();
+    },
   },
 };
 </script>
 
-<style lang="less" scoped>
+<style lang="less">
 .chart {
   display: inline-block;
-  // border: 1px solid lightpink;
+
+  #_hp_chart {
+    #bg {
+      fill: white;
+    }
+    #axis {
+      line {
+        stroke: #dddcea;
+      }
+      .axis-center-line {
+        stroke: #ffffff;
+      }
+      text {
+        fill: #565672;
+      }
+      .text-historical {
+        fill: #55aa00;
+      }
+    }
+    #today {
+      line {
+        stroke: #dddcea;
+      }
+    }
+
+    &.dark {
+      #bg {
+        fill: #140b22;
+      }
+      #axis {
+        line {
+          stroke: #433b71;
+        }
+        .axis-center-line {
+          stroke: #140b22;
+        }
+        text {
+          fill: #cbb7e0;
+        }
+        .text-historical {
+          fill: #55aa00;
+        }
+      }
+      #today {
+        line {
+          stroke: #433b71;
+        }
+      }
+    }
+  }
 }
 </style>
