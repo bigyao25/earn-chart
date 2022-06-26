@@ -169,12 +169,12 @@ export default {
 
       const axisX = svg
         .append("g")
-        .attr("class", "axis-x")
+        .attr("id", "axis-x")
         .attr("transform", `translate(0, ${this.widthes.axisDot + this.chartArea.size.height})`)
         .call(this.xAxis);
       svg
         .append("g")
-        .attr("class", "axis-y")
+        .attr("id", "axis-y")
         .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
         .call(this.yAxis);
 
@@ -297,7 +297,7 @@ export default {
       }
       //#region axis x
 
-      root = svg.select(".axis-x");
+      root = svg.select("#axis-x");
       root.selectAll(`.tick`).classed("tick-selected", false);
       root.selectAll(`.tick:nth-child(${1 + selected})`).classed("tick-selected", true);
 
@@ -338,7 +338,7 @@ export default {
 
 <style lang="less">
 #_mechanism_chart {
-  .axis-x {
+  #axis-x {
     .domain {
       stroke: #dddcea;
     }
@@ -357,7 +357,7 @@ export default {
     }
   }
 
-  .axis-y {
+  #axis-y {
     .domain {
       stroke: #dddcea;
     }
