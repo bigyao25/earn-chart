@@ -31,6 +31,7 @@
 
 <script>
 import dayjs from "dayjs";
+import { randomRange } from "./utils/utils";
 import HistoricalProjectedChart from "./components/HistoricalProjectedChart.vue";
 
 export default {
@@ -100,7 +101,7 @@ export default {
       let wave = (length * 2) / 7;
 
       for (let i = 0; i < length; i++) {
-        let value = this.startValue + stepH * (i - 1) + stepH * this.randomRange(-wave, wave);
+        let value = this.startValue + stepH * (i - 1) + stepH * randomRange(-wave, wave);
         value = value <= this.todayValue ? value : this.todayValue;
         value = value >= preValue ? value : preValue;
         historical.push({ date: today.add(i - length, "day"), value });
@@ -117,16 +118,16 @@ export default {
       let preValuePP = this.todayValue;
 
       for (let i = 1; i <= length; i++) {
-        let valuePC = this.todayValue + stepPC * (i - 1) + stepPC * this.randomRange(-wave, wave);
+        let valuePC = this.todayValue + stepPC * (i - 1) + stepPC * randomRange(-wave, wave);
         valuePC = valuePC >= preValuePC ? valuePC : preValuePC;
         projectedCurrent.push({ date: today.add(i, "day"), value: valuePC });
         preValuePC = valuePC;
 
-        const valuePP = Math.max(preValuePP, valuePC, this.todayValue + stepPP * (i + 1)) + stepPC * this.randomRange(-wave, wave);
+        const valuePP = Math.max(preValuePP, valuePC, this.todayValue + stepPP * (i + 1)) + stepPC * randomRange(-wave, wave);
         // let valuePP = Math.max(
-        //   preValuePP + stepPC * this.randomRange(0, wave),
-        //   valuePC + stepPC * this.randomRange(-wave, wave),
-        //   this.todayValue + stepPP * (i + 1) + stepPC * this.randomRange(-wave, wave)
+        //   preValuePP + stepPC * randomRange(0, wave),
+        //   valuePC + stepPC * randomRange(-wave, wave),
+        //   this.todayValue + stepPP * (i + 1) + stepPC * randomRange(-wave, wave)
         // );
         // if (valuePP > this.todayValue + stepPP * (i + 4)) valuePP = this.todayValue + stepPP * (i + 4);
         projectedPotential.push({ date: today.add(i, "day"), value: valuePP });
@@ -134,13 +135,6 @@ export default {
       }
 
       this.data = { historical, today: { date: today, value: this.todayValue }, projectedCurrent, projectedPotential };
-    },
-
-    randomRange(Min, Max) {
-      var Range = Max - Min;
-      var Rand = Math.random();
-      var num = Min + Math.round(Rand * Range); //四舍五入
-      return num;
     },
   },
   components: { HistoricalProjectedChart },

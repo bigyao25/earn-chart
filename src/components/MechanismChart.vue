@@ -77,36 +77,8 @@ export default {
       // .on("pointermove", pointermoved);
 
       svg.selectAll("*").remove();
-      // const body = svg.append('g').attr('id', 'body');
 
-      //#region axis
-
-      const axisX = svg
-        .append("g")
-        .attr("class", "axis-x")
-        .attr("transform", `translate(0, ${this.widthes.axisDot + this.chartArea.size.height})`)
-        .call(this.xAxis);
-      svg
-        .append("g")
-        .attr("class", "axis-y")
-        .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
-        .call(this.yAxis);
-
-      // 修正x轴两端刻度
-      // axisX.selectAll(".tick:nth-child(2)").attr("transform", "translate(8, 0)");
-      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
-      axisX.selectAll(".tick:nth-child(2)").remove();
-
-      axisX.selectAll(".tick").on("click", event => {
-        const selected = parseInt(event.target.innerHTML.substring(0, 1));
-        this.selectedIndex = selected;
-        this.haldleSelection();
-
-        // if (onAxisClick) onAxisClick(selected);
-        this.$emit("axisXClick", selected);
-      });
-
-      //#endregion
+      this.initAxis();
 
       //#region 曲线
 
@@ -115,38 +87,44 @@ export default {
         .x(d => this.xScale(d.date))
         .y(d => this.yScale(d.value));
 
-      svg
-        .append("path")
-        .attr("id", "defi-bg")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.defi)
-        .attr("stroke-width", 2)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 0.3)
-        .attr("d", this.myLine(this.dataDefi));
+      if (this.dataDefi.length > 0) {
+        svg
+          .append("path")
+          .attr("id", "defi-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.defi)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataDefi));
+      }
 
-      svg
-        .append("path")
-        .attr("id", "staking-bg")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.staking)
-        .attr("stroke-width", 2)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 0.3)
-        .attr("d", this.myLine(this.dataStaking));
+      if (this.dataStaking.length > 0) {
+        svg
+          .append("path")
+          .attr("id", "staking-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.staking)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataStaking));
+      }
 
-      svg
-        .append("path")
-        .attr("id", "liquid-bg")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.liquid)
-        .attr("stroke-width", 2)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 0.3)
-        .attr("d", this.myLine(this.dataLiquid));
+      if (this.dataLiquid.length > 0) {
+        svg
+          .append("path")
+          .attr("id", "liquid-bg")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.liquid)
+          .attr("stroke-width", 2)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 0.3)
+          .attr("d", this.myLine(this.dataLiquid));
+      }
 
       //#endregion
 
@@ -162,6 +140,8 @@ export default {
           { date: 3, value: Math.pow(1 + this.apys.defi, 3) },
           { date: 4, value: Math.pow(1 + this.apys.defi, 4) },
         ];
+      } else {
+        this.dataDefi = [];
       }
       if (this.apys.staking) {
         this.dataStaking = [
@@ -171,6 +151,8 @@ export default {
           { date: 3, value: Math.pow(1 + this.apys.staking, 3) },
           { date: 4, value: Math.pow(1 + this.apys.staking, 4) },
         ];
+      } else {
+        this.dataStaking = [];
       }
       if (this.apys.liquid) {
         this.dataLiquid = [
@@ -180,6 +162,8 @@ export default {
           { date: 3, value: Math.pow(1 + this.apys.liquid, 3) },
           { date: 4, value: Math.pow(1 + this.apys.liquid, 4) },
         ];
+      } else {
+        this.dataLiquid = [];
       }
     },
 
@@ -226,6 +210,35 @@ export default {
       this.yAxis = axisRight(this.yScale).ticks(0, "").tickSizeOuter(0).tickSizeInner(0);
     },
 
+    initAxis() {
+      const svg = select("#_mechanism_chart");
+
+      const axisX = svg
+        .append("g")
+        .attr("class", "axis-x")
+        .attr("transform", `translate(0, ${this.widthes.axisDot + this.chartArea.size.height})`)
+        .call(this.xAxis);
+      svg
+        .append("g")
+        .attr("class", "axis-y")
+        .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
+        .call(this.yAxis);
+
+      // 修正x轴两端刻度
+      // axisX.selectAll(".tick:nth-child(2)").attr("transform", "translate(8, 0)");
+      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
+      axisX.selectAll(".tick:nth-child(2)").remove();
+
+      axisX.selectAll(".tick").on("click", event => {
+        const selected = parseInt(event.target.innerHTML.substring(0, 1));
+        this.selectedIndex = selected;
+        this.haldleSelection();
+
+        // if (onAxisClick) onAxisClick(selected);
+        this.$emit("axisXClick", selected);
+      });
+    },
+
     haldleSelection() {
       const svg = select("#_mechanism_chart");
       svg.selectAll("#staking-selected").remove();
@@ -234,42 +247,47 @@ export default {
       if (selected < 0) return;
 
       let data;
-      data = this.dataDefi.filter(m => m.date <= selected);
-      svg
-        .append("path")
-        .attr("id", "staking-selected")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.defi)
-        .attr("stroke-width", 4)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 1)
-        .attr("d", this.myLine(data));
+      if (this.dataDefi.length > 0) {
+        data = this.dataDefi.filter(m => m.date <= selected);
+        svg
+          .append("path")
+          .attr("id", "staking-selected")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.defi)
+          .attr("stroke-width", 4)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 1)
+          .attr("d", this.myLine(data));
+      }
 
-      data = this.dataStaking.filter(m => m.date <= selected);
-      svg
-        .append("path")
-        .attr("id", "staking-selected")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.staking)
-        .attr("stroke-width", 4)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 1)
-        .attr("d", this.myLine(data));
+      if (this.dataStaking.length > 0) {
+        data = this.dataStaking.filter(m => m.date <= selected);
+        svg
+          .append("path")
+          .attr("id", "staking-selected")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.staking)
+          .attr("stroke-width", 4)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 1)
+          .attr("d", this.myLine(data));
+      }
 
-      data = this.dataLiquid.filter(m => m.date <= selected);
-      svg
-        .append("path")
-        .attr("id", "staking-selected")
-        .attr("fill", "none")
-        .attr("stroke", this.colors.liquid)
-        .attr("stroke-width", 4)
-        .attr("stroke-linecap", "round")
-        .attr("stroke-linejoin", "round")
-        .attr("stroke-opacity", 1)
-        .attr("d", this.myLine(data));
-
+      if (this.dataLiquid.length > 0) {
+        data = this.dataLiquid.filter(m => m.date <= selected);
+        svg
+          .append("path")
+          .attr("id", "staking-selected")
+          .attr("fill", "none")
+          .attr("stroke", this.colors.liquid)
+          .attr("stroke-width", 4)
+          .attr("stroke-linecap", "round")
+          .attr("stroke-linejoin", "round")
+          .attr("stroke-opacity", 1)
+          .attr("d", this.myLine(data));
+      }
       //#region axis x
 
       svg.select(".axis-x").selectAll(`.tick`).classed("tick-selected", false);
@@ -302,6 +320,12 @@ export default {
       this.selectedIndex = selected;
       console.log(this.selectedIndex);
       this.haldleSelection();
+    },
+  },
+  watch: {
+    apys(n, o) {
+      console.log("watch", n, o);
+      this.init();
     },
   },
 };
