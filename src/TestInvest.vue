@@ -77,6 +77,9 @@ export default {
     },
   },
   watch: {
+    tieredApys() {
+      this.handle();
+    },
     compound() {
       this.handle();
     },

@@ -29,7 +29,7 @@ export const getRewardOneDay = (principal: number, apyTiers: TieredApyItem[]) =>
     if (restPrincipal <= 0) return false;
 
     let tierPrincipal;
-    if (restPrincipal < t.tiered.max) {
+    if (restPrincipal <= t.tiered.max - t.tiered.min) {
       tierPrincipal = restPrincipal;
     } else {
       tierPrincipal = t.tiered.max - t.tiered.min;
