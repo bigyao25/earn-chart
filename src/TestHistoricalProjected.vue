@@ -103,18 +103,23 @@ export default {
 
     fillData(length) {
       const today = dayjs(dayjs().format("YYYY-MM-DD"));
+      const startValue = Number(this.startValue);
+      const todayValue = Number(this.todayValue);
+      const lastValuePC = Number(this.lastValuePC);
+      const lastValuePP = Number(this.lastValuePP);
       // console.log(today, today.subtract(7, "day").format("YYYY-MM-DD"));
 
       // historical
-      const historical = [{ date: today.subtract(length, "day"), value: this.startValue }];
-      let stepH = (this.todayValue - this.startValue) / length;
-      let preValue = this.startValue;
+      const historical = [{ date: today.subtract(length, "day"), value: startValue }];
+      let stepH = (todayValue - startValue) / length;
+      let preValue = Number(startValue);
       let wave = (length * 2) / 7;
 
       for (let i = 0; i < length; i++) {
-        let value = this.startValue + stepH * (i - 1) + stepH * randomRange(-wave, wave);
-        value = value <= this.todayValue ? value : this.todayValue;
+        let value = startValue + stepH * (i - 1) + stepH * randomRange(-wave, wave);
+        value = value <= todayValue ? value : todayValue;
         value = value >= preValue ? value : preValue;
+        console.log("value", value);
         historical.push({ date: today.add(i - length, "day"), value });
 
         preValue = value;
@@ -123,29 +128,29 @@ export default {
       // projected
       const projectedCurrent = [];
       const projectedPotential = [];
-      const stepPC = (this.lastValuePC - this.todayValue) / length;
-      const stepPP = (this.lastValuePP - this.todayValue) / length;
-      let preValuePC = this.todayValue;
-      let preValuePP = this.todayValue;
+      const stepPC = (lastValuePC - todayValue) / length;
+      const stepPP = (lastValuePP - todayValue) / length;
+      let preValuePC = todayValue;
+      let preValuePP = todayValue;
 
       for (let i = 1; i <= length; i++) {
-        let valuePC = this.todayValue + stepPC * (i - 1) + stepPC * randomRange(-wave, wave);
+        let valuePC = todayValue + stepPC * (i - 1) + stepPC * randomRange(-wave, wave);
         valuePC = valuePC >= preValuePC ? valuePC : preValuePC;
         projectedCurrent.push({ date: today.add(i, "day"), value: valuePC });
         preValuePC = valuePC;
 
-        const valuePP = Math.max(preValuePP, valuePC, this.todayValue + stepPP * (i + 1)) + stepPC * randomRange(-wave, wave);
+        const valuePP = Math.max(preValuePP, valuePC, todayValue + stepPP * (i + 1)) + stepPC * randomRange(-wave, wave);
         // let valuePP = Math.max(
         //   preValuePP + stepPC * randomRange(0, wave),
         //   valuePC + stepPC * randomRange(-wave, wave),
-        //   this.todayValue + stepPP * (i + 1) + stepPC * randomRange(-wave, wave)
+        //   todayValue + stepPP * (i + 1) + stepPC * randomRange(-wave, wave)
         // );
-        // if (valuePP > this.todayValue + stepPP * (i + 4)) valuePP = this.todayValue + stepPP * (i + 4);
+        // if (valuePP > todayValue + stepPP * (i + 4)) valuePP = todayValue + stepPP * (i + 4);
         projectedPotential.push({ date: today.add(i, "day"), value: valuePP });
         preValuePP = valuePP;
       }
 
-      this.data = { historical, today: { date: today, value: this.todayValue }, projectedCurrent, projectedPotential };
+      this.data = { historical, today: { date: today, value: todayValue }, projectedCurrent, projectedPotential };
     },
   },
   components: { HistoricalProjectedChart },
