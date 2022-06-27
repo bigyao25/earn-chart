@@ -503,16 +503,16 @@ export default {
       });
 
       obj.on("mouseout", function (d) {
-        var tip = select("#tip");
+        let tip = select("#tip");
         tip.transition().duration(300).remove();
       });
     },
 
     drawTip(obj, root) {
-      var tip = select("#tip");
+      let tip = select("#tip");
       if (!tip.empty()) return;
 
-      var self = select(obj);
+      let self = select(obj);
       const tipWidth = 130;
       const tipHeight = 70;
       const cx = self.property("cx").baseVal.value;
@@ -526,7 +526,7 @@ export default {
         tipX = cx - tipWidth;
       }
       if (tipY < 0) {
-        tipY = cy;
+        tipY = cy + 10;
       } else {
       }
 
@@ -540,8 +540,6 @@ export default {
         .attr("rx", 8)
         .attr("width", tipWidth)
         .attr("height", tipHeight)
-        .attr("fill", "white")
-        .attr("stroke", 0.5)
         .attr("filter", "drop-shadow(-3px 5px 10px rgba(46, 31, 61, 0.1))");
 
       const tipDate = self.attr("data-date");
@@ -722,10 +720,23 @@ export default {
       .text-historical {
         fill: #55aa00;
       }
+      .text-projected {
+        fill: #6884dc;
+      }
     }
     #today {
       line {
         stroke: #dddcea;
+      }
+    }
+    #hover {
+      #tip {
+        fill: white;
+        stroke: #dddcea;
+      }
+      text {
+        fill: #2c2236;
+        stroke: none;
       }
     }
 
@@ -746,10 +757,23 @@ export default {
         .text-historical {
           fill: #55aa00;
         }
+        .text-projected {
+          fill: #6884dc;
+        }
       }
       #today {
         line {
           stroke: #433b71;
+        }
+      }
+      #hover {
+        #tip {
+          fill: #140b22;
+          stroke: #433b71;
+        }
+        text {
+          fill: #ffffff;
+          stroke: none;
         }
       }
     }
