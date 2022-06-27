@@ -264,7 +264,6 @@ export default {
 
       const svg = select("#_hp_chart");
       svg.classed("dark", this.dark);
-      console.log("dark", this.dark);
       svg.selectAll("*").remove();
 
       var defs = svg.append("defs");

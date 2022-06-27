@@ -6,6 +6,9 @@
     <div class="card bg-green">
       <TestHistoricalProjected />
     </div>
+    <div class="card bg-blue">
+      <TestInvest></TestInvest>
+    </div>
     <div class="card bg-gray">
       <Test1></Test1>
     </div>
@@ -16,6 +19,7 @@
 import dayjs from "dayjs";
 import TestHistoricalProjected from "./TestHistoricalProjected.vue";
 import TestMechanism from "./TestMechanism.vue";
+import TestInvest from "./TestInvest.vue";
 import Test1 from "./components/Test1.vue";
 
 export default {
@@ -23,7 +27,7 @@ export default {
     return {};
   },
   methods: {},
-  components: { TestHistoricalProjected, TestMechanism, Test1 },
+  components: { TestHistoricalProjected, TestMechanism, TestInvest, Test1 },
 };
 </script>
 

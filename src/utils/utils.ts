@@ -7,12 +7,12 @@ export const randomRange = (min: number, max: number, isRound = false) => {
 };
 
 type TieredApyItem = {
-  tiered: { start: number; end: number };
+  tiered: { min: number; max: number };
   apy: number;
 };
 type GetProfitByApyOptions = {
-  principal: number;
   apyTiers: TieredApyItem[];
+  principal: number;
   compound?: boolean;
   days?: number;
 };
@@ -29,14 +29,14 @@ export const getRewardOneDay = (principal: number, apyTiers: TieredApyItem[]) =>
     if (restPrincipal <= 0) return false;
 
     let tierPrincipal;
-    if (restPrincipal < t.tiered.end) {
+    if (restPrincipal < t.tiered.max) {
       tierPrincipal = restPrincipal;
     } else {
-      tierPrincipal = t.tiered.end - t.tiered.start;
+      tierPrincipal = t.tiered.max - t.tiered.min;
     }
 
     reward += tierPrincipal * (t.apy / 365);
-    restPrincipal = restPrincipal - (t.tiered.end - t.tiered.start);
+    restPrincipal = restPrincipal - (t.tiered.max - t.tiered.min);
   });
   return reward;
 };
@@ -45,7 +45,7 @@ export const getRewardOneDay = (principal: number, apyTiers: TieredApyItem[]) =>
  * 获取本息和
  * @param options principal: 本金；apyTiers: 阶梯利率；compound: 是否复利；days: 存入天数
  */
-export const getProfitByApy = (options: GetProfitByApyOptions) => {
+export const getInvestByApy = (options: GetProfitByApyOptions) => {
   const ops = { ...{ compound: false, days: 1 }, ...options } as Required<GetProfitByApyOptions>;
 
   let principal = ops.principal;
@@ -56,5 +56,5 @@ export const getProfitByApy = (options: GetProfitByApyOptions) => {
     if (ops.compound) principal += reward;
   }
 
-  return principal + totalReward;
+  return { rewards: totalReward, total: ops.principal + totalReward };
 };
