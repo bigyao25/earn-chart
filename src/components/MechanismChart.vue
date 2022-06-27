@@ -44,6 +44,7 @@ export default {
       },
       colors: {
         axisLine: "#DDDCEA",
+        axisLineDark: "#433b71",
         defi: "#6884DC",
         staking: "#925BCA",
         liquid: "#EEAD00",
@@ -86,7 +87,7 @@ export default {
       var defs = svg.append("defs");
       var arrowMarker = defs
         .append("marker")
-        .attr("id", "axisDot")
+        .attr("id", "m-axisDot")
         .attr("markerUnits", "strokeWidth")
         .attr("markerWidth", this.widthes.axisDot * 2)
         .attr("markerHeight", this.widthes.axisDot * 2)
@@ -94,7 +95,12 @@ export default {
         .attr("refX", this.widthes.axisDot)
         .attr("refY", this.widthes.axisDot)
         .attr("orient", "auto");
-      arrowMarker.append("circle").attr("cx", this.widthes.axisDot).attr("cy", this.widthes.axisDot).attr("r", this.widthes.axisDot).attr("fill", this.colors.axisLine);
+      arrowMarker
+        .append("circle")
+        .attr("cx", this.widthes.axisDot)
+        .attr("cy", this.widthes.axisDot)
+        .attr("r", this.widthes.axisDot)
+        .attr("fill", this.dark ? this.colors.axisLineDark : this.colors.axisLine);
 
       //#endregion
 
@@ -205,7 +211,7 @@ export default {
         this.haldleSelection();
         this.$emit("axisXClick", selected);
       });
-      axisX.select("path").attr("marker-end", "url(#axisDot)").attr("marker-start", "url(#axisDot)");
+      axisX.select("path").attr("marker-end", "url(#m-axisDot)").attr("marker-start", "url(#axisDot)");
       axisX.selectAll(".tick").select("text");
       // 修正x轴两端刻度
       axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
@@ -217,7 +223,7 @@ export default {
         .attr("id", "axis-y")
         .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
         .call(this.yAxis);
-      axisY.select("path").attr("marker-end", "url(#axisDot)").attr("marker-start", "url(#axisDot)");
+      axisY.select("path").attr("marker-end", "url(#m-axisDot)").attr("marker-start", "url(#axisDot)");
 
       // grid
       const grids = svg.append("g").attr("id", "grids");

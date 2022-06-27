@@ -47,6 +47,7 @@ export default {
       colors: {
         background: "#FFFFFF",
         axisLine: "#DDDCEA",
+        axisLineDark: "#433b71",
         fontTickValue: "#565672",
         fontHistorical: "#55AA00",
         fontProjected: "#6884DC",
@@ -145,8 +146,8 @@ export default {
         .attr("y1", this.widthes.axisDot)
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.widthes.marginTop + this.chartArea.size.height + this.widthes.axisDot)
-        .attr("marker-end", "url(#axisDot)")
-        .attr("marker-start", "url(#axisDot)");
+        .attr("marker-end", "url(#hp-axisDot)")
+        .attr("marker-start", "url(#hp-axisDot)");
 
       const allValues = this.allData.map(m => m.value);
       const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
@@ -181,8 +182,8 @@ export default {
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
         // .attr("width", 40)
-        .attr("marker-end", "url(#axisDot)")
-        .attr("marker-start", "url(#axisDot)");
+        .attr("marker-end", "url(#hp-axisDot)")
+        .attr("marker-start", "url(#hp-axisDot)");
       // 中点
       root
         .append("line")
@@ -274,7 +275,7 @@ export default {
       // 坐标轴圆点
       var arrowMarker = defs
         .append("marker")
-        .attr("id", "axisDot")
+        .attr("id", "hp-axisDot")
         .attr("markerUnits", "strokeWidth")
         .attr("markerWidth", this.widthes.axisDot * 2)
         .attr("markerHeight", this.widthes.axisDot * 2)
@@ -282,7 +283,12 @@ export default {
         .attr("refX", this.widthes.axisDot)
         .attr("refY", this.widthes.axisDot)
         .attr("orient", "auto");
-      arrowMarker.append("circle").attr("cx", this.widthes.axisDot).attr("cy", this.widthes.axisDot).attr("r", this.widthes.axisDot).attr("fill", this.colors.axisLine);
+      arrowMarker
+        .append("circle")
+        .attr("cx", this.widthes.axisDot)
+        .attr("cy", this.widthes.axisDot)
+        .attr("r", this.widthes.axisDot)
+        .attr("fill", this.dark ? this.colors.axisLineDark : this.colors.axisLine);
       // 背景色遮罩
       var whiteFilter = defs.append("filter").attr("x", 0).attr("y", 0).attr("width", 1).attr("height", 1).attr("id", "solid");
       whiteFilter.append("feFlood").attr("flood-color", this.dark ? this.colors.dark.background : this.colors.background);
