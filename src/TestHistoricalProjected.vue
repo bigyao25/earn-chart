@@ -119,7 +119,6 @@ export default {
         let value = startValue + stepH * (i - 1) + stepH * randomRange(-wave, wave);
         value = value <= todayValue ? value : todayValue;
         value = value >= preValue ? value : preValue;
-        console.log("value", value);
         historical.push({ date: today.add(i - length, "day"), value });
 
         preValue = value;
