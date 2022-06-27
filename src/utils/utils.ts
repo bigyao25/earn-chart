@@ -7,7 +7,7 @@ export const randomRange = (min: number, max: number, isRound = false) => {
 };
 
 type TieredApyItem = {
-  tiered: { min: number; max: number };
+  tier: { min: number; max: number };
   apy: number;
 };
 type GetProfitByApyOptions = {
@@ -29,14 +29,14 @@ export const getRewardOneDay = (principal: number, apyTiers: TieredApyItem[]) =>
     if (restPrincipal <= 0) return false;
 
     let tierPrincipal;
-    if (restPrincipal <= t.tiered.max - t.tiered.min) {
+    if (restPrincipal <= t.tier.max - t.tier.min) {
       tierPrincipal = restPrincipal;
     } else {
-      tierPrincipal = t.tiered.max - t.tiered.min;
+      tierPrincipal = t.tier.max - t.tier.min;
     }
 
     reward += tierPrincipal * (t.apy / 365);
-    restPrincipal = restPrincipal - (t.tiered.max - t.tiered.min);
+    restPrincipal = restPrincipal - (t.tier.max - t.tier.min);
   });
   return reward;
 };

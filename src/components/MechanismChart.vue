@@ -8,7 +8,7 @@
 /**
  * ✅TODO：黑夜模式
  * ✅TODO: X轴网格线
- * TODO: 应该传入每年的预计息后资产（加入复利的）
+ * ✅TODO: 应该传入每年的预计息后资产（加入复利的）
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
@@ -17,12 +17,13 @@ import { line, curveLinear, curveBasis, curveCardinal, stack, area } from "d3-sh
 import { axisBottom, axisRight } from "d3-axis";
 import "d3-transition";
 import { Decimal } from "decimal.js";
+import { getInvestByApy } from "../utils/utils";
 
 export default {
   props: {
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
-    apys: Object,
+    data: Object,
     selected: Number,
     onAxisClick: Function,
     dark: { type: Boolean, default: false },
@@ -90,35 +91,35 @@ export default {
     },
 
     fillData() {
-      if (this.apys.defi) {
+      if (this.data.defi) {
         this.dataDefi = [
           { date: 0, value: 1 },
-          { date: 1, value: Math.pow(1 + this.apys.defi, 1) },
-          { date: 2, value: Math.pow(1 + this.apys.defi, 2) },
-          { date: 3, value: Math.pow(1 + this.apys.defi, 3) },
-          { date: 4, value: Math.pow(1 + this.apys.defi, 4) },
+          { date: 1, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 1 }).total },
+          { date: 2, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 2 }).total },
+          { date: 3, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 3 }).total },
+          { date: 4, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 4 }).total },
         ];
       } else {
         this.dataDefi = [];
       }
-      if (this.apys.staking) {
+      if (this.data.staking) {
         this.dataStaking = [
           { date: 0, value: 1 },
-          { date: 1, value: Math.pow(1 + this.apys.staking, 1) },
-          { date: 2, value: Math.pow(1 + this.apys.staking, 2) },
-          { date: 3, value: Math.pow(1 + this.apys.staking, 3) },
-          { date: 4, value: Math.pow(1 + this.apys.staking, 4) },
+          { date: 1, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 1 }).total },
+          { date: 2, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 2 }).total },
+          { date: 3, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 3 }).total },
+          { date: 4, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 4 }).total },
         ];
       } else {
         this.dataStaking = [];
       }
-      if (this.apys.liquid) {
+      if (this.data.liquid) {
         this.dataLiquid = [
           { date: 0, value: 1 },
-          { date: 1, value: Math.pow(1 + this.apys.liquid, 1) },
-          { date: 2, value: Math.pow(1 + this.apys.liquid, 2) },
-          { date: 3, value: Math.pow(1 + this.apys.liquid, 3) },
-          { date: 4, value: Math.pow(1 + this.apys.liquid, 4) },
+          { date: 1, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 1 }).total },
+          { date: 2, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 2 }).total },
+          { date: 3, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 3 }).total },
+          { date: 4, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 4 }).total },
         ];
       } else {
         this.dataLiquid = [];
@@ -143,7 +144,6 @@ export default {
       this.xScale = scaleLinear()
         .domain([Math.min(...allData.map(d => d.date)), Math.max(...allData.map(d => d.date))])
         .range([this.chartArea.bottomLeft.x, this.widthes.axisDot + this.chartArea.size.width]);
-
       this.xAxis = axisBottom(this.xScale)
         .ticks(4, null)
         .tickFormat(d => d + "Y")
@@ -151,12 +151,16 @@ export default {
         .tickSizeInner(0)
         .tickPadding(25);
 
-      const maxApy = Math.max(this.apys.defi ?? -1, this.apys.staking ?? -1, this.apys.liquid ?? -1);
-      if (maxApy === this.apys.defi) {
+      const maxApy = Math.max(
+        this.dataDefi?.[this.dataDefi?.length - 1]?.value ?? -1,
+        this.dataStaking?.[this.dataStaking?.length - 1]?.value ?? -1,
+        this.dataLiquid?.[this.dataLiquid?.length - 1]?.value ?? -1
+      );
+      if (maxApy === this.dataDefi?.[this.dataDefi?.length - 1]?.value) {
         this.yScale = scaleLinear()
           .domain([this.dataDefi[0].value, this.dataDefi[this.dataDefi.length - 1].value])
           .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
-      } else if (maxApy === this.apys.staking) {
+      } else if (maxApy === this.dataStaking?.[this.dataStaking?.length - 1]?.value) {
         this.yScale = scaleLinear()
           .domain([this.dataStaking[0].value, this.dataStaking[this.dataStaking.length - 1].value])
           .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
@@ -347,7 +351,7 @@ export default {
     },
   },
   watch: {
-    apys() {
+    data() {
       this.init();
       this.haldleSelection();
     },

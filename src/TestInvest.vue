@@ -9,9 +9,9 @@
         </h2>
         <div class="tier" v-for="(tier, i) in tieredApys">
           Tier #{{ i + 1 }} min.
-          <input type="text" v-model="tier.tiered.min" />
+          <input type="text" v-model="tier.tier.min" />
           max.
-          <input type="text" v-model="tier.tiered.max" />
+          <input type="text" v-model="tier.tier.max" />
           APY
           <input type="text" v-model="tier.apy" />
         </div>
@@ -55,9 +55,9 @@ export default {
   data() {
     return {
       tieredApys: [
-        { tiered: { min: 0, max: 100 }, apy: 0.1 },
-        { tiered: { min: 100, max: 1000 }, apy: 0.2 },
-        { tiered: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
+        { tier: { min: 0, max: 100 }, apy: 0.1 },
+        { tier: { min: 100, max: 1000 }, apy: 0.2 },
+        { tier: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
       ],
       compound: true,
       principal: 1000,

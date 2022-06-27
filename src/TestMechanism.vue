@@ -1,6 +1,6 @@
 <template>
   <div class="body">
-    <MechanismChart :apys="apys" :selected="selected" @axis-x-click="axisXClick" :width="378" :height="270" :dark="dark" />
+    <MechanismChart :data="data" :selected="selected" @axis-x-click="axisXClick" :width="378" :height="270" :dark="dark" />
 
     <div class="right">
       <button @click="handleChange">Change Data</button>
@@ -13,14 +13,31 @@
 <script>
 import dayjs from "dayjs";
 import MechanismChart from "./components/MechanismChart.vue";
+import { randomRange } from "./utils/utils";
 
 export default {
   data() {
     return {
-      apys: {
-        defi: 0.4,
-        staking: 0.3,
-        liquid: 0.04,
+      data: {
+        defi: {
+          apys: [
+            { tier: { min: 0, max: 100 }, apy: 0.1 },
+            { tier: { min: 100, max: 1000 }, apy: 0.2 },
+          ],
+          compound: false,
+        },
+        staking: {
+          apys: [
+            { tier: { min: 0, max: 100 }, apy: 0.1 },
+            { tier: { min: 100, max: 1000 }, apy: 0.2 },
+            { tier: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
+          ],
+          compound: true,
+        },
+        liquid: {
+          apys: [{ tier: { min: 0, max: Number.MAX_VALUE }, apy: 0.05 }],
+          compound: false,
+        },
       },
       selected: 2,
       dark: false,
@@ -28,9 +45,9 @@ export default {
   },
   mounted() {
     const tieredApy = [
-      { tiered: { min: 0, max: 100 }, apy: 0.1 },
-      { tiered: { min: 100, max: 1000 }, apy: 0.2 },
-      { tiered: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
+      { tier: { min: 0, max: 100 }, apy: 0.1 },
+      { tier: { min: 100, max: 1000 }, apy: 0.2 },
+      { tier: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
     ];
   },
   methods: {
@@ -38,25 +55,45 @@ export default {
       this.selected = selected;
     },
     handleChange() {
-      const apys = {};
+      const data = {};
+
+      const fill = () => {
+        let generator = {
+          apys: [],
+          compound: Math.random() > 0.5,
+        };
+        let apy = randomRange(0, 0.3);
+        generator.apys.push({ tier: { min: 0, max: 100 }, apy });
+        apy = randomRange(apy, 1);
+        generator.apys.push({ tier: { min: 0, max: 1000 }, apy });
+        apy = randomRange(apy, 1);
+        generator.apys.push({ tier: { min: 0, max: Number.MAX_VALUE }, apy });
+        return generator;
+      };
+
       if (Math.random() <= 0.8) {
-        apys.defi = Math.random();
+        data.defi = fill();
       }
       if (Math.random() <= 0.8) {
-        apys.staking = Math.random();
+        data.staking = fill();
       }
       if (Math.random() <= 0.8) {
-        apys.liquid = Math.random();
+        data.liquid = fill();
       }
 
-      if (!apys.defi && !apys.staking && !apys.liquid) {
-        apys.staking = Math.random();
+      if (!data.defi && !data.staking && !data.liquid) {
+        data.staking = fill();
       }
 
-      this.apys = apys;
+      this.data = data;
     },
     handleChangeMode() {
       this.dark = !this.dark;
+    },
+  },
+  watch: {
+    data() {
+      console.log(this.data);
     },
   },
   components: { MechanismChart },
