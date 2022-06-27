@@ -81,6 +81,23 @@ export default {
 
       svg.selectAll("*").remove();
 
+      //#region defs
+
+      var defs = svg.append("defs");
+      var arrowMarker = defs
+        .append("marker")
+        .attr("id", "axisDot")
+        .attr("markerUnits", "strokeWidth")
+        .attr("markerWidth", this.widthes.axisDot * 2)
+        .attr("markerHeight", this.widthes.axisDot * 2)
+        .attr("viewBox", `0 0 ${this.widthes.axisDot * 2} ${this.widthes.axisDot * 2}`)
+        .attr("refX", this.widthes.axisDot)
+        .attr("refY", this.widthes.axisDot)
+        .attr("orient", "auto");
+      arrowMarker.append("circle").attr("cx", this.widthes.axisDot).attr("cy", this.widthes.axisDot).attr("r", this.widthes.axisDot).attr("fill", this.colors.axisLine);
+
+      //#endregion
+
       svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
 
       this.initAxis();
@@ -188,17 +205,19 @@ export default {
         this.haldleSelection();
         this.$emit("axisXClick", selected);
       });
+      axisX.select("path").attr("marker-end", "url(#axisDot)").attr("marker-start", "url(#axisDot)");
       axisX.selectAll(".tick").select("text");
       // 修正x轴两端刻度
       axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
       axisX.selectAll(".tick:nth-child(2)").remove();
 
       // y
-      svg
+      const axisY = svg
         .append("g")
         .attr("id", "axis-y")
         .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
         .call(this.yAxis);
+      axisY.select("path").attr("marker-end", "url(#axisDot)").attr("marker-start", "url(#axisDot)");
 
       // grid
       const grids = svg.append("g").attr("id", "grids");

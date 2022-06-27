@@ -91,11 +91,6 @@ export default {
       this.dark = !this.dark;
     },
   },
-  watch: {
-    data() {
-      console.log(this.data);
-    },
-  },
   components: { MechanismChart },
 };
 </script>
