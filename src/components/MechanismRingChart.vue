@@ -52,6 +52,8 @@ export default {
       // feMerge.append("feMergeNode").attr("in", "offsetBlur");
       // feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
+      svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
+
       var myArc = arc()
         .innerRadius(Math.min(this.width, this.height) / 2 - 6)
         .outerRadius(Math.min(this.width, this.height) / 2)
@@ -77,6 +79,7 @@ export default {
         root
           .append("text")
           .text(this.data.info.text)
+          .attr("y", 2)
           .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
           .attr("text-anchor", "middle")
           .attr("dominant-baseline", "middle")
@@ -96,15 +99,27 @@ export default {
     data() {
       this.init();
     },
+    dark() {
+      this.init();
+    },
   },
 };
 </script>
 
 <style lang="less">
 #_mr_chart {
+  #bg {
+    fill: #ffffff;
+  }
   text {
     font-family: Mulish Bold;
     letter-spacing: -1.5;
+  }
+
+  &.dark {
+    #bg {
+      fill: #140b22;
+    }
   }
 }
 </style>
