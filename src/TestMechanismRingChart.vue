@@ -1,9 +1,12 @@
 <template>
   <div class="body">
-    <MechanismRingChart :data="data" :width="378" :height="270" :dark="dark" />
+    <MechanismRingChart :data="data" :width="89" :height="89" :dark="dark" />
 
     <div class="right">
-      <button @click="handleChange">Change Data</button>
+      <button @click="handleStyle1">Style 1</button>
+      <button @click="handleStyle2">Style 2</button>
+      <button @click="handleStyle3">Style 3</button>
+      <button @click="handleStyle4">Style 4</button>
       <button @click="handleChangeMode">Change Mode</button>
     </div>
   </div>
@@ -19,48 +22,52 @@ export default {
     return {
       data: {
         ranges: [
-          { range: { min: 0, max: 0.75 }, color: "purple" },
-          { range: { min: 0.75, max: 1 }, color: "gray" },
+          { range: { min: 0, max: 0.75 }, color: "#925BCA" },
+          { range: { min: 0.75, max: 1 }, color: "#DDDCEA" },
         ],
-        text: "75%",
+        info: { text: "75%", color: "#925BCA" },
+        defaultColor: "#DDDCEA",
       },
       selected: 2,
       dark: false,
     };
   },
   methods: {
-    handleChange() {
-      const data = {};
-
-      const fill = () => {
-        let generator = {
-          apys: [],
-          compound: Math.random() > 0.5,
-        };
-        let apy = randomRange(0, 0.3);
-        generator.apys.push({ tier: { min: 0, max: 100 }, apy });
-        apy = randomRange(apy, 1);
-        generator.apys.push({ tier: { min: 0, max: 1000 }, apy });
-        apy = randomRange(apy, 1);
-        generator.apys.push({ tier: { min: 0, max: Number.MAX_VALUE }, apy });
-        return generator;
+    handleStyle1() {
+      this.data = {
+        ranges: [
+          { range: { min: 0, max: 0.75 }, color: "#925BCA" },
+          { range: { min: 0.75, max: 1 }, color: "#DDDCEA" },
+        ],
+        info: { text: "75%", color: "#925BCA" },
+        defaultColor: "#DDDCEA",
       };
-
-      if (Math.random() <= 0.8) {
-        data.defi = fill();
-      }
-      if (Math.random() <= 0.8) {
-        data.staking = fill();
-      }
-      if (Math.random() <= 0.8) {
-        data.liquid = fill();
-      }
-
-      if (!data.defi && !data.staking && !data.liquid) {
-        data.staking = fill();
-      }
-
-      this.data = data;
+    },
+    handleStyle2() {
+      this.data = {
+        ranges: [
+          { range: { min: 0, max: 0.75 }, color: "#DDDCEA" },
+          { range: { min: 0.75, max: 1 }, color: "#6E87D7" },
+        ],
+        info: { text: "25%", color: "#6E87D7" },
+        defaultColor: "#DDDCEA",
+      };
+    },
+    handleStyle3() {
+      this.data = {
+        ranges: [{ range: { min: 0, max: 1 }, color: "#EEAD00" }],
+        info: { text: "100%", color: "#EEAD00" },
+        defaultColor: "#DDDCEA",
+      };
+    },
+    handleStyle4() {
+      this.data = {
+        ranges: [
+          { range: { min: 0, max: 0.75 }, color: "#925BCA" },
+          { range: { min: 0.75, max: 1 }, color: "#6E87D7" },
+        ],
+        defaultColor: "#DDDCEA",
+      };
     },
     handleChangeMode() {
       this.dark = !this.dark;

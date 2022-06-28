@@ -14,7 +14,8 @@ import { arc, pie } from "d3-shape";
       {range: [min: 0, max: .75], color: 'purple'},
       {range: [min: 0.75, max: 1], color: 'gray'}
     ],
-    text: '75%'
+    text: '75%',
+    defaultColor: gray
   }
  */
 export default {
@@ -39,46 +40,49 @@ export default {
       const svg = select("#_mr_chart");
       svg.classed("dark", this.dark);
 
-      // const outerRadius = Math.min(this.width, this.height) / 2;
-      // const myPie = pie()
-      //   .padAngle(1 / 365)
-      //   .sort(null)
-      //   .value(i => i.radius)(this.arcData);
-      // const myArc = arc()
-      //   .innerRadius(outerRadius - 10)
-      //   .outerRadius(outerRadius);
+      svg.selectAll("*").remove();
 
-      // svg
-      //   .append("g")
-      //   .attr("stroke", "blue")
-      //   .attr("stroke-width", 1)
-      //   .attr("stroke-linejoin", "round")
-      //   .selectAll("path")
-      //   .data(myPie)
-      //   .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
-      //   .join("path")
-      //   .attr("fill", d => d.color)
-      //   .attr("d", myArc);
+      // var defs = svg.append("defs");
+      // var filter = defs.append("filter").attr("id", "dropshadow");
+      // filter.append("feGaussianBlur").attr("in", "SourceAlpha").attr("stdDeviation", 4).attr("result", "blur");
+      // filter.append("feOffset").attr("in", "blur").attr("dx", 0).attr("dy", 0).attr("result", "offsetBlur");
+      // filter.append("feFlood").attr("in", "offsetBlur").attr("flood-color", "#925BCA").attr("flood-opacity", "0.5").attr("result", "offsetColor");
+      // filter.append("feComposite").attr("in", "offsetColor").attr("in2", "offsetBlur").attr("operator", "in").attr("result", "offsetBlur");
+      // var feMerge = filter.append("feMerge");
+      // feMerge.append("feMergeNode").attr("in", "offsetBlur");
+      // feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-      var myArc = arc().innerRadius(90).outerRadius(100);
-      var myPie = pie()(this.arcData.map(d => d.radius));
+      var myArc = arc()
+        .innerRadius(Math.min(this.width, this.height) / 2 - 6)
+        .outerRadius(Math.min(this.width, this.height) / 2)
+        .cornerRadius(d => {
+          return d.data.color === this.data.defaultColor ? 0 : 5;
+        });
+      var myPie = pie()
+        .padAngle(15 / 365)
+        .value(d => d.radius)(this.arcData);
 
       const root = svg.append("g");
       root
         .selectAll("g")
         .data(myPie)
         .enter()
-        .append("g")
-        .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
         .append("path")
-        .attr("d", d => {
-          console.log(222, d);
-          return myArc(d);
-        })
-        .attr("fill", (d, i) => {
-          console.log(333, d, i);
-          return "yellow";
-        });
+        .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
+        .attr("d", d => myArc(d))
+        .attr("fill", d => d.data.color);
+      // .attr("filter", "url(#dropshadow)");
+
+      if (this.data.info?.text) {
+        root
+          .append("text")
+          .text(this.data.info.text)
+          .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
+          .attr("text-anchor", "middle")
+          .attr("dominant-baseline", "middle")
+          .attr("font-size", 24)
+          .attr("fill", this.data.info.color);
+      }
     },
     fillData() {
       const ranges = this.data.ranges.sort((x, y) => x.range.min - y.range.min);
@@ -88,7 +92,19 @@ export default {
       this.arcData = ranges.map(r => ({ radius: r.range.max - r.range.min, color: r.color }));
     },
   },
+  watch: {
+    data() {
+      this.init();
+    },
+  },
 };
 </script>
 
-<style lang="less"></style>
+<style lang="less">
+#_mr_chart {
+  text {
+    font-family: Mulish Bold;
+    letter-spacing: -1.5;
+  }
+}
+</style>
