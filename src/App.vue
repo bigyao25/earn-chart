@@ -26,6 +26,10 @@ export default {
   data() {
     return {};
   },
+  mounted() {
+    let a = 0;
+    console.log(a ?? 1);
+  },
   methods: {},
   components: { TestHistoricalProjected, TestMechanism, TestInvest, Test1 },
 };

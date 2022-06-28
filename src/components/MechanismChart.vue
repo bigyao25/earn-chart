@@ -65,7 +65,7 @@ export default {
   mounted() {
     this.init();
 
-    this.selectedIndex = this.selected ?? -1;
+    this.selectedIndex = this.selected === undefined ? -1 : this.selected;
     this.haldleSelection();
   },
 
@@ -174,11 +174,13 @@ export default {
         .tickSizeInner(0)
         .tickPadding(25);
 
-      const maxApy = Math.max(
-        this.dataDefi?.[this.dataDefi?.length - 1]?.value ?? -1,
-        this.dataStaking?.[this.dataStaking?.length - 1]?.value ?? -1,
-        this.dataLiquid?.[this.dataLiquid?.length - 1]?.value ?? -1
-      );
+      // const maxApy = Math.max(this.dataDefi?.[this.dataDefi?.length - 1]?.value ?? -1, this.dataStaking?.[this.dataStaking?.length - 1]?.value ?? -1, this.dataLiquid?.[this.dataLiquid?.length - 1]?.value ?? -1);
+      // 兼容 pc 项目低版本 es
+      const defi = this.dataDefi?.[this.dataDefi?.length - 1]?.value;
+      const staking = this.dataStaking?.[this.dataStaking?.length - 1]?.value;
+      const liquid = this.dataLiquid?.[this.dataLiquid?.length - 1]?.value;
+      const maxApy = Math.max(defi === undefined ? -1 : defi, staking === undefined ? -1 : staking, liquid === undefined ? -1 : liquid);
+
       if (maxApy === this.dataDefi?.[this.dataDefi?.length - 1]?.value) {
         this.yScale = scaleLinear()
           .domain([this.dataDefi[0].value, this.dataDefi[this.dataDefi.length - 1].value])

@@ -12,7 +12,7 @@
  * ✅TODO: 最后一天的tip无法显示
  * ✅TODO: 鼠标竖线上下的小菱形
  *
- * BUG: 30000级别的图表，给了300级别数据重新render时，显示错误
+ * ✅BUG: 30000级别的图表，给了300级别数据重新render时，显示错误
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
@@ -23,7 +23,6 @@ import { Decimal } from "decimal.js";
 import { format } from "d3-format";
 
 export default {
-  // props: ["height", "width", "divide", "value", "breakpoint", "paddingTop", "paddingRight"],
   props: {
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
@@ -33,24 +32,18 @@ export default {
   data() {
     return {
       widthes: {
-        axisDot: 2.5, // 坐标轴顶点半径
+        axisDot: 2.5,
         axisLineThickness: 1,
-        xTickeValueArea: 30, // x轴标尺文字高度
-        yTickeValueArea: 30, // y轴标尺文字高度
-        marginTop: 8, // 顶部margin，dot会突出
-        tickeValueFontSize: 12, // 标尺文字大小
-        tickeValueFontWeight: 400,
-        tickeValueFontWeightBold: 700,
-        // tipWidth: 80,
-        // tipHeight: 60,
+        xTickeValueArea: 30,
+        yTickeValueArea: 30,
+        marginTop: 8,
+        tickValueFontSize: 12,
+        tickValueFontWeight: 400,
       },
       colors: {
         background: "#FFFFFF",
         axisLine: "#DDDCEA",
         axisLineDark: "#433b71",
-        fontTickValue: "#565672",
-        fontHistorical: "#55AA00",
-        fontProjected: "#6884DC",
         lineHistorical: "#55AA00",
         lineProjectedCurrent: "#6884DC",
         lineProjectedPotential: "#925BCA",
@@ -79,14 +72,6 @@ export default {
 
   mounted() {
     this.init();
-  },
-
-  computed: {
-    // historicalData: function () {
-    //   const { historical, today } = this.data;
-    //   console.log("historicalData changed.");
-    //   return [...this.data.historical, this.data.today];
-    // },
   },
 
   methods: {
@@ -127,7 +112,6 @@ export default {
         projectedCurrent: m.value - Math.min(...allValuesH), // 得到差值
         projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value - m.value, // 得到差值
       }));
-      // console.log("rightStackData", rightStackData);
       const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
       this.rightSeries = rightStack(rightStackData);
       this.rightFill = ["transparent", "url(#gradientPC)", "url(#gradientPP)"];
@@ -168,8 +152,8 @@ export default {
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish")
-          .attr("font-size", this.widthes.tickeValueFontSize)
-          .attr("font-weight", this.widthes.tickeValueFontWeight);
+          .attr("font-size", this.widthes.tickValueFontSize)
+          .attr("font-weight", this.widthes.tickValueFontWeight);
       });
       //#endregion
 
@@ -181,7 +165,6 @@ export default {
         .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
         .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
         .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        // .attr("width", 40)
         .attr("marker-end", "url(#hp-axisDot)")
         .attr("marker-start", "url(#hp-axisDot)");
       // 中点
@@ -212,8 +195,8 @@ export default {
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight);
+        .attr("font-size", this.widthes.tickValueFontSize)
+        .attr("font-weight", this.widthes.tickValueFontWeight);
       // Projected
       root
         .append("text")
@@ -223,8 +206,8 @@ export default {
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish")
-        .attr("font-size", this.widthes.tickeValueFontSize)
-        .attr("font-weight", this.widthes.tickeValueFontWeight);
+        .attr("font-size", this.widthes.tickValueFontSize)
+        .attr("font-weight", this.widthes.tickValueFontWeight);
       // x 文字
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
@@ -236,7 +219,7 @@ export default {
         .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize);
+        .attr("font-size", this.widthes.tickValueFontSize);
       root
         .append("text")
         .text(dateToday.format("MMM D, YYYY"))
@@ -244,7 +227,7 @@ export default {
         .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize)
+        .attr("font-size", this.widthes.tickValueFontSize)
         .attr("text-anchor", "middle");
       root
         .append("text")
@@ -254,7 +237,7 @@ export default {
         .attr("y", this.height - this.widthes.axisDot)
         .attr("text-anchor", "end")
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickeValueFontSize);
+        .attr("font-size", this.widthes.tickValueFontSize);
 
       //#endregion
     },
@@ -328,7 +311,6 @@ export default {
       root = svg.append("g");
       root
         .attr("id", "leftArea")
-        // .append("g")
         .selectAll("path")
         .data(this.leftSeries)
         .enter()
@@ -361,19 +343,9 @@ export default {
       this.lineH = line()
         .x(d => this.xScale(dayjs(d.date)))
         .y(d => this.yScale(d.value))
-        // .curve(curveBasis);
-        // .curve(curveLinear);
         .curve(curveCardinal);
       // historical
-      root
-        .append("path")
-        .datum(this.historicalData)
-        // .transition()
-        .attr("id", "chartH")
-        .attr("d", this.lineH)
-        .attr("stroke", this.colors.lineHistorical)
-        .attr("stroke-width", 3)
-        .attr("fill", "transparent");
+      root.append("path").datum(this.historicalData).attr("id", "chartH").attr("d", this.lineH).attr("stroke", this.colors.lineHistorical).attr("stroke-width", 3).attr("fill", "transparent");
       // projectedCurrent
       root
         .append("path")
@@ -437,7 +409,6 @@ export default {
 
       let date = dayjs(this.xScale.invert(x));
       date = dayjs(date.format("YYYY-MM-DD"));
-      // date = dayjs(date.format("YYYY-MM-DD")).add(12, "hour");
 
       svg.selectAll("#hover").remove();
       const root = svg.append("g").attr("id", "hover");
@@ -446,10 +417,8 @@ export default {
       root
         .append("line")
         .attr("id", "hover-line")
-        // .attr("x1", x)
         .attr("x1", this.xScale(date))
         .attr("y1", this.chartArea.bottomLeft.y)
-        // .attr("x2", x)
         .attr("x2", this.xScale(date))
         .attr("y2", this.chartArea.bottomLeft.y - this.chartArea.size.height)
         .attr("stroke", this.colors.lineHistorical)
@@ -492,7 +461,6 @@ export default {
         .append("circle")
         .attr("id", "today-dot")
         .attr("cx", this.xScale(date))
-        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
         .attr("cy", this.yScale(value))
         .attr("r", 5)
         .attr("fill", fillColor)
@@ -553,10 +521,8 @@ export default {
       tip
         .append("text")
         .text(dayjs(tipDate).format("MMM D"))
-        // .attr("dx", self.property("cx").baseVal.value)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 20)
-        // .attr("filter", "url(#solid)")
         .attr("style", "font-family: Mulish; font-size: 12; font-weight: 400;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
@@ -573,7 +539,6 @@ export default {
       tip
         .append("text")
         .text(`$${format(".2~s")(tipValue)}`)
-        // .text(`$${tipValue}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 60)
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
@@ -581,47 +546,32 @@ export default {
         .attr("fill", this.colors.fontTip);
     },
 
-    // intlFormat(num) {
-    //   return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
-    // },
-    // makeFriendly(num) {
-    //   if (num >= 1000000) return intlFormat(num / 1000000) + "M";
-    //   if (num >= 1000) return intlFormat(num / 1000) + "k";
-    //   return intlFormat(num);
-    // },
-    intlFormat(num) {
-      return new Intl.NumberFormat().format(Math.round(num * 10) / 10);
-    },
-    makeFrandly(num, isRoundUp) {
-      // let quzheng = isRoundUp ? Decimal.ceil : Decimal.floor;
-
-      const c1K = 1000,
-        c1M = 1000000;
-      let fixed;
-      if (isRoundUp) {
-        if (num.gt(c1M)) fixed = Decimal.ceil(Decimal.div(num, c1M)).times(c1M);
-        else if (num.gt(c1K)) fixed = Decimal.ceil(Decimal.div(num, c1K)).times(c1K);
-        else fixed = num;
-      } else {
-        if (num.gt(c1M)) fixed = Decimal.floor(Decimal.div(num, c1M)).times(c1M);
-        else if (num.gt(c1K)) fixed = Decimal.floor(Decimal.div(num, c1K)).times(c1K);
-        else fixed = num;
-      }
-
-      return fixed;
-    },
     makeTike(min, max) {
       min = Decimal(min);
-      // min = Decimal(0);// y轴是否总是从0开始
       max = Decimal(max);
 
-      const fixedMin = this.makeFrandly(Decimal(min), false),
-        fixedMax = this.makeFrandly(Decimal(max), true);
+      const makeFrandly = (num, isRoundUp) => {
+        const c1K = 1000,
+          c1M = 1000000;
+        let fixed;
+        if (isRoundUp) {
+          if (num.gt(c1M)) fixed = Decimal.ceil(Decimal.div(num, c1M)).times(c1M);
+          else if (num.gt(c1K)) fixed = Decimal.ceil(Decimal.div(num, c1K)).times(c1K);
+          else fixed = num;
+        } else {
+          if (num.gt(c1M)) fixed = Decimal.floor(Decimal.div(num, c1M)).times(c1M);
+          else if (num.gt(c1K)) fixed = Decimal.floor(Decimal.div(num, c1K)).times(c1K);
+          else fixed = num;
+        }
 
-      // const fixedMid = this.makeFrandly(Decimal.add(max, min).dividedBy(2), true);
-      // return [fixedMin, fixedMid, fixedMax];
-      const fixedMid1 = this.makeFrandly(min.add(max.sub(min).dividedBy(3)), true);
-      const fixedMid2 = this.makeFrandly(min.add(max.sub(min).dividedBy(3).mul(2)), true);
+        return fixed;
+      };
+
+      const fixedMin = makeFrandly(Decimal(min), false),
+        fixedMax = makeFrandly(Decimal(max), true);
+
+      const fixedMid1 = makeFrandly(min.add(max.sub(min).dividedBy(3)), false);
+      const fixedMid2 = makeFrandly(min.add(max.sub(min).dividedBy(3).mul(2)), false);
       return [fixedMin, fixedMid1, fixedMid2, fixedMax];
     },
   },
@@ -655,7 +605,6 @@ export default {
       const leftArea = select("#leftArea");
       leftArea.selectAll("path").data([]).exit().remove();
       leftArea
-        // .append("g")
         .selectAll("path")
         .data(this.leftSeries)
         .enter()
@@ -669,7 +618,6 @@ export default {
       const rightArea = select("#rightArea");
       rightArea.selectAll("path").data([]).exit().remove();
       rightArea
-        // .append("g")
         .selectAll("path")
         .data(this.rightSeries)
         .enter()
@@ -691,7 +639,6 @@ export default {
       select("#today-dot")
         .transition()
         .attr("cx", this.xScale(dayjs(this.data.today.date)))
-        // .attr("cy", this.yScale((Math.min(...allValues) + Math.max(...allValues)) / 2))// 必居中
         .attr("cy", this.yScale(this.data.today.value))
         .attr("data-date", this.data.today.date)
         .attr("data-value", this.data.today.value);
