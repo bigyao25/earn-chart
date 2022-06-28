@@ -9,6 +9,7 @@
     <div class="card bg-blue">
       <TestInvest></TestInvest>
     </div>
+    <div class="card bg-yellow"><TestMechanismRingChart></TestMechanismRingChart></div>
     <div class="card bg-gray">
       <Test1></Test1>
     </div>
@@ -19,6 +20,7 @@
 import dayjs from "dayjs";
 import TestHistoricalProjected from "./TestHistoricalProjected.vue";
 import TestMechanism from "./TestMechanism.vue";
+import TestMechanismRingChart from "./TestMechanismRingChart.vue";
 import TestInvest from "./TestInvest.vue";
 import Test1 from "./components/Test1.vue";
 
@@ -31,7 +33,7 @@ export default {
     console.log(a ?? 1);
   },
   methods: {},
-  components: { TestHistoricalProjected, TestMechanism, TestInvest, Test1 },
+  components: { TestHistoricalProjected, TestMechanism, TestMechanismRingChart, TestInvest, Test1 },
 };
 </script>
 
@@ -101,6 +103,10 @@ export default {
 
   .bg-blue {
     background-color: rgba(0, 0, 255, 0.1);
+  }
+
+  .bg-yellow {
+    background-color: rgba(255, 255, 0, 0.1);
   }
 
   .bg-gray {
