@@ -7,6 +7,8 @@
 <script>
 import { select } from "d3-selection";
 import { arc, pie } from "d3-shape";
+import { interpolateNumber } from "d3-interpolate";
+import { format } from "d3-format";
 /**
  *
   data: {
@@ -78,7 +80,16 @@ export default {
       if (this.data.info?.text) {
         root
           .append("text")
-          .text(this.data.info.text)
+          // .text(this.data.info.text)
+          .data([100])
+          .transition(
+            svg.transition().duration(1000)
+            // .ease(d3.easeLinear)
+          )
+          .tween("text", d => {
+            console.log(22222, d);
+            return this.textTween(0, d);
+          })
           .attr("y", 2)
           .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
           .attr("text-anchor", "middle")
@@ -93,6 +104,12 @@ export default {
         ranges.push({ range: { min: ranges[ranges.length - 1].range.max, max: 1 }, color: "red" });
       }
       this.arcData = ranges.map(r => ({ radius: r.range.max - r.range.min, color: r.color }));
+    },
+    textTween(a, b) {
+      const i = interpolateNumber(a, b);
+      return function (t) {
+        this.textContent = format(",d")(i(t));
+      };
     },
   },
   watch: {
