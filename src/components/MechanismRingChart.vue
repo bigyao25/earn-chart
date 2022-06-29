@@ -82,8 +82,6 @@ export default {
         const num = this.data.info?.text;
         root
           .append("text")
-          // .text(this.data.info.text)
-
           .attr("y", 2)
           .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
           .attr("text-anchor", "middle")
