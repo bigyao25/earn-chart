@@ -55,7 +55,7 @@ export default {
       svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
 
       var myArc = arc()
-        .innerRadius(Math.min(this.width, this.height) / 2 - 6)
+        .innerRadius(Math.min(this.width, this.height) / 2 - 5)
         .outerRadius(Math.min(this.width, this.height) / 2)
         .cornerRadius(d => {
           return d.data.color === this.data.defaultColor ? 0 : 5;
@@ -113,7 +113,7 @@ export default {
   }
   text {
     font-family: Mulish Bold;
-    letter-spacing: -1.5;
+    letter-spacing: -0.015em;
   }
 
   &.dark {
