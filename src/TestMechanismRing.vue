@@ -25,7 +25,7 @@ export default {
           { range: { min: 0, max: 0.75 }, color: "#925BCA" },
           { range: { min: 0.75, max: 1 }, color: "#DDDCEA" },
         ],
-        info: { text: "75%", color: "#925BCA" },
+        info: { text: 0.75, color: "#925BCA" },
         defaultColor: "#DDDCEA",
       },
       selected: 2,
@@ -39,7 +39,7 @@ export default {
           { range: { min: 0, max: 0.75 }, color: "#925BCA" },
           { range: { min: 0.75, max: 1 }, color: "#DDDCEA" },
         ],
-        info: { text: "75%", color: "#925BCA" },
+        info: { text: 0.75, color: "#925BCA" },
         defaultColor: "#DDDCEA",
       };
     },
@@ -49,14 +49,14 @@ export default {
           { range: { min: 0, max: 0.75 }, color: "#DDDCEA" },
           { range: { min: 0.75, max: 1 }, color: "#6E87D7" },
         ],
-        info: { text: "25%", color: "#6E87D7" },
+        info: { text: 0.25, color: "#6E87D7" },
         defaultColor: "#DDDCEA",
       };
     },
     handleStyle3() {
       this.data = {
         ranges: [{ range: { min: 0, max: 1 }, color: "#EEAD00" }],
-        info: { text: "100%", color: "#EEAD00" },
+        info: { text: 1, color: "#EEAD00" },
         defaultColor: "#DDDCEA",
       };
     },
