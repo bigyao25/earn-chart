@@ -12,14 +12,14 @@ import { format } from "d3-format";
 import { active } from "d3-transition";
 /**
  *
-  data: {
-    ranges: [
-      {range: [min: 0, max: .75], color: 'purple'},
-      {range: [min: 0.75, max: 1], color: 'gray'}
-    ],
-    text: '75%',
-    defaultColor: gray
-  }
+      data: {
+        ranges: [
+          { range: { min: 0, max: 0.75 }, color: "#925BCA" },
+          { range: { min: 0.75, max: 1 }, color: "#DDDCEA" },
+        ],
+        info: { text: 0.75, color: "#925BCA" },
+        defaultColor: "#DDDCEA",
+      },
  */
 export default {
   props: {
@@ -45,16 +45,6 @@ export default {
 
       svg.selectAll("*").remove();
 
-      // var defs = svg.append("defs");
-      // var filter = defs.append("filter").attr("id", "dropshadow");
-      // filter.append("feGaussianBlur").attr("in", "SourceAlpha").attr("stdDeviation", 4).attr("result", "blur");
-      // filter.append("feOffset").attr("in", "blur").attr("dx", 0).attr("dy", 0).attr("result", "offsetBlur");
-      // filter.append("feFlood").attr("in", "offsetBlur").attr("flood-color", "#925BCA").attr("flood-opacity", "0.5").attr("result", "offsetColor");
-      // filter.append("feComposite").attr("in", "offsetColor").attr("in2", "offsetBlur").attr("operator", "in").attr("result", "offsetBlur");
-      // var feMerge = filter.append("feMerge");
-      // feMerge.append("feMergeNode").attr("in", "offsetBlur");
-      // feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
       svg.append("rect").attr("id", "bg").attr("width", "100%").attr("height", "100%");
 
       var myArc = arc()
@@ -76,7 +66,6 @@ export default {
         .attr("transform", `translate(${this.width / 2}, ${this.height / 2})`)
         .attr("d", d => myArc(d))
         .attr("fill", d => d.data.color);
-      // .attr("filter", "url(#dropshadow)");
 
       if (this.data.info?.text) {
         const num = this.data.info?.text;
