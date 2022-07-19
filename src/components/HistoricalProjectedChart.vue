@@ -13,6 +13,9 @@
  * ✅TODO: 鼠标竖线上下的小菱形
  *
  * ✅BUG: 30000级别的图表，给了300级别数据重新render时，显示错误
+ * ✅BUG: today的tip背景总是黑色
+ * ✅BUG: Y轴刻度小于1时显示错误
+ * ✅BUG: 曲线阴影没有与曲线贴合
  */
 import dayjs from "dayjs";
 import { select } from "d3-selection";
@@ -20,7 +23,8 @@ import { scaleUtc, scaleLinear } from "d3-scale";
 import { line, curveLinear, curveBasis, curveCardinal, stack, area, symbol, symbolSquare } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
-import { format } from "d3-format";
+// import { format } from "d3-format";
+import { abridgeNumber } from "../utils/utils";
 
 export default {
   props: {
@@ -136,6 +140,7 @@ export default {
       const allValues = this.allData.map(m => m.value);
       const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
       yTicks.forEach(n => {
+        console.log("yticks", n.toNumber());
         root
           .append("line")
           .attr("x1", this.chartArea.bottomLeft.x)
@@ -148,7 +153,8 @@ export default {
           .append("text")
           .attr("x", 0)
           .attr("y", this.yScale(n.toNumber()))
-          .text(`$${format(".2~s")(n.toNumber()).toUpperCase()}`)
+          // .text(`$${format(".2~s")(n.toNumber()).toUpperCase()}`)
+          .text(`$${abridgeNumber(n.toNumber())}`)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish")
@@ -307,7 +313,8 @@ export default {
       this.leftArea = area()
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
-        .y1(d => this.yScale(d[1] - d[0]));
+        .y1(d => this.yScale(d[1] - d[0]))
+        .curve(curveCardinal);
       root = svg.append("g");
       root
         .attr("id", "leftArea")
@@ -322,7 +329,8 @@ export default {
       this.rightArea = area()
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
-        .y1(d => this.yScale(d[1]));
+        .y1(d => this.yScale(d[1]))
+        .curve(curveCardinal);
       root = svg.append("g");
       root
         .attr("id", "rightArea")
@@ -391,7 +399,7 @@ export default {
 
       svg.on("pointermove", this.pointermoved);
       svg.on("mouseleave", () => {
-        select("#_hp_chart").selectAll("#hover").remove();
+        select("#_hp_chart").selectAll("#hover").transition().duration(300).remove();
       });
 
       //#endregion
@@ -538,7 +546,8 @@ export default {
 
       tip
         .append("text")
-        .text(`$${format(".2~s")(tipValue)}`)
+        // .text(`$${format(".2~s")(tipValue)}`)
+        .text(`$${abridgeNumber(tipValue)}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 60)
         .attr("style", "font-family: Mulish Bold; font-size: 14;")
@@ -681,11 +690,9 @@ export default {
         stroke: #dddcea;
       }
     }
-    #hover {
-      #tip {
-        fill: white;
-        stroke: #dddcea;
-      }
+    #tip {
+      fill: white;
+      stroke: #dddcea;
       text {
         fill: #2c2236;
         stroke: none;
@@ -718,11 +725,9 @@ export default {
           stroke: #433b71;
         }
       }
-      #hover {
-        #tip {
-          fill: #140b22;
-          stroke: #433b71;
-        }
+      #tip {
+        fill: #140b22;
+        stroke: #433b71;
         text {
           fill: #ffffff;
           stroke: none;

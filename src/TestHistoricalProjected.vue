@@ -9,6 +9,7 @@
         <button v-on:click="handleClick1M">1M</button>
         <button v-on:click="handleClick3M">3M</button>
         <button v-on:click="handleClick1Y">1Y</button>
+        <button v-on:click="handleClickTest">Test</button>
       </div>
 
       <div class="values">
@@ -37,7 +38,7 @@
 
 <script>
 import dayjs from "dayjs";
-import { randomRange } from "./utils/utils";
+import { randomRange, abridgeNumber } from "./utils/utils";
 import HistoricalProjectedChart from "./components/HistoricalProjectedChart.vue";
 
 export default {
@@ -45,32 +46,32 @@ export default {
     return {
       data: {
         historical: [
-          { date: dayjs("2022-06-01"), value: 57 },
-          { date: dayjs("2022-06-02"), value: 65 },
-          { date: dayjs("2022-06-03"), value: 75 },
-          { date: dayjs("2022-06-04"), value: 81 },
-          { date: dayjs("2022-06-05"), value: 86 },
-          { date: dayjs("2022-06-06"), value: 90 },
-          { date: dayjs("2022-06-07"), value: 95 },
+          { date: dayjs("2022-06-01"), value: 0 },
+          { date: dayjs("2022-06-02"), value: 0 },
+          { date: dayjs("2022-06-03"), value: 0 },
+          { date: dayjs("2022-06-04"), value: 0 },
+          { date: dayjs("2022-06-05"), value: 0 },
+          { date: dayjs("2022-06-06"), value: 0 },
+          { date: dayjs("2022-06-07"), value: 0 },
         ],
-        today: { date: dayjs("2022-06-08"), value: 100 },
+        today: { date: dayjs("2022-06-08"), value: 0.0111 },
         projectedCurrent: [
-          { date: dayjs("2022-06-09"), value: 115 },
-          { date: dayjs("2022-06-10"), value: 125 },
-          { date: dayjs("2022-06-11"), value: 135 },
-          { date: dayjs("2022-06-12"), value: 155 },
-          { date: dayjs("2022-06-13"), value: 165 },
-          { date: dayjs("2022-06-14"), value: 175 },
-          { date: dayjs("2022-06-15"), value: 195 },
+          { date: dayjs("2022-06-09"), value: 0.0115 },
+          { date: dayjs("2022-06-10"), value: 0.0125 },
+          { date: dayjs("2022-06-11"), value: 0.0135 },
+          { date: dayjs("2022-06-12"), value: 0.0155 },
+          { date: dayjs("2022-06-13"), value: 0.0165 },
+          { date: dayjs("2022-06-14"), value: 0.0175 },
+          { date: dayjs("2022-06-15"), value: 0.0195 },
         ],
         projectedPotential: [
-          { date: dayjs("2022-06-09"), value: 135 },
-          { date: dayjs("2022-06-10"), value: 145 },
-          { date: dayjs("2022-06-11"), value: 165 },
-          { date: dayjs("2022-06-12"), value: 185 },
-          { date: dayjs("2022-06-13"), value: 195 },
-          { date: dayjs("2022-06-14"), value: 215 },
-          { date: dayjs("2022-06-15"), value: 245 },
+          { date: dayjs("2022-06-09"), value: 0.0135 },
+          { date: dayjs("2022-06-10"), value: 0.0145 },
+          { date: dayjs("2022-06-11"), value: 0.0165 },
+          { date: dayjs("2022-06-12"), value: 0.0185 },
+          { date: dayjs("2022-06-13"), value: 0.0195 },
+          { date: dayjs("2022-06-14"), value: 0.0215 },
+          { date: dayjs("2022-06-15"), value: 0.0245 },
         ],
       },
       startValue: 1000,
@@ -82,8 +83,19 @@ export default {
   },
   mounted() {
     this.fillData(7);
+
+    this.abridge(0);
+    this.abridge(100);
+    this.abridge(12345);
+    this.abridge(123456);
+    this.abridge(12345678);
+    this.abridge(0.1);
+    this.abridge(0.1234567);
   },
   methods: {
+    abridge(num) {
+      console.log(num, abridgeNumber(num));
+    },
     handleClick1W() {
       this.fillData(7);
     },
@@ -95,6 +107,38 @@ export default {
     },
     handleClick1Y() {
       this.fillData(365);
+    },
+    handleClickTest() {
+      this.data = {
+        historical: [
+          { date: dayjs("2022-06-01"), value: 0 },
+          { date: dayjs("2022-06-02"), value: 0 },
+          { date: dayjs("2022-06-03"), value: 0 },
+          { date: dayjs("2022-06-04"), value: 0 },
+          { date: dayjs("2022-06-05"), value: 0 },
+          { date: dayjs("2022-06-06"), value: 0 },
+          { date: dayjs("2022-06-07"), value: 0 },
+        ],
+        today: { date: dayjs("2022-06-08"), value: 0.06 },
+        projectedCurrent: [
+          { date: dayjs("2022-06-09"), value: 0.115 },
+          { date: dayjs("2022-06-10"), value: 0.125 },
+          { date: dayjs("2022-06-11"), value: 0.135 },
+          { date: dayjs("2022-06-12"), value: 0.155 },
+          { date: dayjs("2022-06-13"), value: 0.165 },
+          { date: dayjs("2022-06-14"), value: 0.175 },
+          { date: dayjs("2022-06-15"), value: 0.195 },
+        ],
+        projectedPotential: [
+          { date: dayjs("2022-06-09"), value: 0.32 },
+          { date: dayjs("2022-06-10"), value: 0.48 },
+          { date: dayjs("2022-06-11"), value: 0.64 },
+          { date: dayjs("2022-06-12"), value: 0.8 },
+          { date: dayjs("2022-06-13"), value: 0.96 },
+          { date: dayjs("2022-06-14"), value: 1.12 },
+          { date: dayjs("2022-06-15"), value: 1.34 },
+        ],
+      };
     },
 
     handleChangeMode() {
