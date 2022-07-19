@@ -1,6 +1,6 @@
 <template>
   <div class="body">
-    <HistoricalProjectedChart :data="data" :width="378" :height="270" :dark="dark" />
+    <HistoricalProjectedChart :svgId="'test-hp-chart'" :data="data" :width="378" :height="270" :dark="dark" />
     <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
     <div class="right">

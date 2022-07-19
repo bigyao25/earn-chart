@@ -23,7 +23,7 @@ export default {
   props: {
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
-    data: Object,
+    data: Array,
     selected: Number,
     onAxisClick: Function,
     dark: { type: Boolean, default: false },
@@ -45,14 +45,9 @@ export default {
       colors: {
         axisLine: "#DDDCEA",
         axisLineDark: "#433b71",
-        defi: "#6884DC",
-        staking: "#925BCA",
-        liquid: "#EEAD00",
       },
       chartArea: {},
-      dataDefi: [],
-      dataStaking: [],
-      dataLiquid: [],
+      dailyLinesData: [],
       xScale: {},
       yScale: {},
       myLine: {},
@@ -114,39 +109,24 @@ export default {
     },
 
     fillData() {
-      if (this.data.defi) {
-        this.dataDefi = [
-          { date: 0, value: 1 },
-          { date: 1, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 1 }).total },
-          { date: 2, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 2 }).total },
-          { date: 3, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 3 }).total },
-          { date: 4, value: getInvestByApy({ apyTiers: this.data.defi.apys, principal: 1, compound: this.data.defi.compound, days: 365 * 4 }).total },
-        ];
-      } else {
-        this.dataDefi = [];
-      }
-      if (this.data.staking) {
-        this.dataStaking = [
-          { date: 0, value: 1 },
-          { date: 1, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 1 }).total },
-          { date: 2, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 2 }).total },
-          { date: 3, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 3 }).total },
-          { date: 4, value: getInvestByApy({ apyTiers: this.data.staking.apys, principal: 1, compound: this.data.staking.compound, days: 365 * 4 }).total },
-        ];
-      } else {
-        this.dataStaking = [];
-      }
-      if (this.data.liquid) {
-        this.dataLiquid = [
-          { date: 0, value: 1 },
-          { date: 1, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 1 }).total },
-          { date: 2, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 2 }).total },
-          { date: 3, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 3 }).total },
-          { date: 4, value: getInvestByApy({ apyTiers: this.data.liquid.apys, principal: 1, compound: this.data.liquid.compound, days: 365 * 4 }).total },
-        ];
-      } else {
-        this.dataLiquid = [];
-      }
+      const dailyLinesData = [];
+
+      this.data.forEach(item => {
+        const dailyData = {
+          data: [
+            { date: 0, value: 1 },
+            { date: 1, value: getInvestByApy({ apyTiers: item.apys, principal: 1, compound: item.compound, days: 365 * 1 }).total },
+            { date: 2, value: getInvestByApy({ apyTiers: item.apys, principal: 1, compound: item.compound, days: 365 * 2 }).total },
+            { date: 3, value: getInvestByApy({ apyTiers: item.apys, principal: 1, compound: item.compound, days: 365 * 3 }).total },
+            { date: 4, value: getInvestByApy({ apyTiers: item.apys, principal: 1, compound: item.compound, days: 365 * 4 }).total },
+          ],
+          compound: item.compound,
+          color: item.color,
+        };
+        dailyLinesData.push(dailyData);
+      });
+
+      this.dailyLinesData = dailyLinesData;
     },
 
     initChart() {
@@ -163,7 +143,8 @@ export default {
     },
 
     initScale() {
-      const allData = [...this.dataDefi, ...this.dataStaking, ...this.dataLiquid];
+      const allData = this.dailyLinesData.map(d => d.data).flat();
+
       this.xScale = scaleLinear()
         .domain([Math.min(...allData.map(d => d.date)), Math.max(...allData.map(d => d.date))])
         .range([this.chartArea.bottomLeft.x, this.widthes.axisDot + this.chartArea.size.width]);
@@ -174,26 +155,9 @@ export default {
         .tickSizeInner(0)
         .tickPadding(25);
 
-      // const maxApy = Math.max(this.dataDefi?.[this.dataDefi?.length - 1]?.value ?? -1, this.dataStaking?.[this.dataStaking?.length - 1]?.value ?? -1, this.dataLiquid?.[this.dataLiquid?.length - 1]?.value ?? -1);
-      // 兼容 pc 项目低版本 es
-      const defi = this.dataDefi?.[this.dataDefi?.length - 1]?.value;
-      const staking = this.dataStaking?.[this.dataStaking?.length - 1]?.value;
-      const liquid = this.dataLiquid?.[this.dataLiquid?.length - 1]?.value;
-      const maxApy = Math.max(defi === undefined ? -1 : defi, staking === undefined ? -1 : staking, liquid === undefined ? -1 : liquid);
-
-      if (maxApy === this.dataDefi?.[this.dataDefi?.length - 1]?.value) {
-        this.yScale = scaleLinear()
-          .domain([this.dataDefi[0].value, this.dataDefi[this.dataDefi.length - 1].value])
-          .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
-      } else if (maxApy === this.dataStaking?.[this.dataStaking?.length - 1]?.value) {
-        this.yScale = scaleLinear()
-          .domain([this.dataStaking[0].value, this.dataStaking[this.dataStaking.length - 1].value])
-          .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
-      } else {
-        this.yScale = scaleLinear()
-          .domain([this.dataLiquid[0].value, this.dataLiquid[this.dataLiquid.length - 1].value])
-          .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
-      }
+      this.yScale = scaleLinear()
+        .domain([Math.min(...allData.map(d => d.value)), Math.max(...allData.map(d => d.value))])
+        .range([this.chartArea.bottomLeft.y, this.widthes.axisDot]);
       this.yAxis = axisRight(this.yScale).ticks(0, "").tickSizeOuter(0).tickSizeInner(0);
     },
 
@@ -254,44 +218,18 @@ export default {
       if (root.empty()) root = svg.append("g").attr("id", "lines");
       else root.selectAll("*").remove();
 
-      if (this.dataDefi.length > 0) {
+      this.dailyLinesData.forEach((d, i) => {
         root
           .append("path")
-          .attr("id", "defi-bg")
+          .attr("id", `line-${i}`)
           .attr("fill", "none")
-          .attr("stroke", this.colors.defi)
+          .attr("stroke", d.color)
           .attr("stroke-width", 2)
           .attr("stroke-linecap", "round")
           .attr("stroke-linejoin", "round")
           .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataDefi));
-      }
-
-      if (this.dataStaking.length > 0) {
-        root
-          .append("path")
-          .attr("id", "staking-bg")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.staking)
-          .attr("stroke-width", 2)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataStaking));
-      }
-
-      if (this.dataLiquid.length > 0) {
-        root
-          .append("path")
-          .attr("id", "liquid-bg")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.liquid)
-          .attr("stroke-width", 2)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 0.3)
-          .attr("d", this.myLine(this.dataLiquid));
-      }
+          .attr("d", this.myLine(d.data));
+      });
     },
 
     haldleSelection() {
@@ -303,49 +241,19 @@ export default {
       const selected = this.selectedIndex;
       if (selected < 0) return;
 
-      //#region lines
-      let data;
-      if (this.dataDefi.length > 0) {
-        data = this.dataDefi.filter(m => m.date <= selected);
+      this.dailyLinesData.forEach((d, i) => {
+        const data = d.data.filter(m => m.date <= selected);
         root
           .append("path")
-          .attr("id", "staking-selected")
+          .attr("id", `line-s-${i}`)
           .attr("fill", "none")
-          .attr("stroke", this.colors.defi)
+          .attr("stroke", d.color)
           .attr("stroke-width", 4)
           .attr("stroke-linecap", "round")
           .attr("stroke-linejoin", "round")
           .attr("stroke-opacity", 1)
           .attr("d", this.myLine(data));
-      }
-
-      if (this.dataStaking.length > 0) {
-        data = this.dataStaking.filter(m => m.date <= selected);
-        root
-          .append("path")
-          .attr("id", "staking-selected")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.staking)
-          .attr("stroke-width", 4)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 1)
-          .attr("d", this.myLine(data));
-      }
-
-      if (this.dataLiquid.length > 0) {
-        data = this.dataLiquid.filter(m => m.date <= selected);
-        root
-          .append("path")
-          .attr("id", "staking-selected")
-          .attr("fill", "none")
-          .attr("stroke", this.colors.liquid)
-          .attr("stroke-width", 4)
-          .attr("stroke-linecap", "round")
-          .attr("stroke-linejoin", "round")
-          .attr("stroke-opacity", 1)
-          .attr("d", this.myLine(data));
-      }
+      });
       //#endregion
 
       //#region axis x

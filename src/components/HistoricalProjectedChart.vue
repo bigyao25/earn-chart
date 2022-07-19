@@ -1,6 +1,6 @@
 <template>
   <div class="chart relative">
-    <svg id="_hp_chart" :height="height" :width="width"></svg>
+    <svg :id="svgId" :height="height" :width="width" class="_hp_chart"></svg>
   </div>
 </template>
 
@@ -28,6 +28,7 @@ import { abridgeNumber } from "../utils/utils";
 
 export default {
   props: {
+    svgId: { type: String, default: "_hp_chart" },
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
     data: Object,
@@ -122,7 +123,7 @@ export default {
     },
 
     initAxis() {
-      const svg = select("#_hp_chart");
+      const svg = select(`#${this.svgId}`);
       if (svg.select("#axis").empty()) svg.append("g").attr("id", "axis");
       const root = svg.select("#axis");
       root.selectAll("*").remove();
@@ -140,7 +141,6 @@ export default {
       const allValues = this.allData.map(m => m.value);
       const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
       yTicks.forEach(n => {
-        console.log("yticks", n.toNumber());
         root
           .append("line")
           .attr("x1", this.chartArea.bottomLeft.x)
@@ -252,7 +252,7 @@ export default {
       this.initScale();
       this.initAreas();
 
-      const svg = select("#_hp_chart");
+      const svg = select(`#${this.svgId}`);
       svg.classed("dark", this.dark);
       svg.selectAll("*").remove();
 
@@ -399,7 +399,7 @@ export default {
 
       svg.on("pointermove", this.pointermoved);
       svg.on("mouseleave", () => {
-        select("#_hp_chart").selectAll("#hover").transition().duration(300).remove();
+        select(`#${this.svgId}`).selectAll("#hover").transition().duration(300).remove();
       });
 
       //#endregion
@@ -408,7 +408,7 @@ export default {
     pointermoved(e) {
       const x = e.offsetX,
         y = e.offsetY;
-      const svg = select("#_hp_chart");
+      const svg = select(`#${this.svgId}`);
 
       if (x <= this.chartArea.bottomLeft.x || x >= this.chartArea.bottomLeft.x + this.chartArea.size.width || y >= this.chartArea.bottomLeft.y || y <= this.widthes.axisDot) {
         svg.selectAll("#hover").remove();
@@ -664,7 +664,7 @@ export default {
 .chart {
   display: inline-block;
 
-  #_hp_chart {
+  ._hp_chart {
     #bg {
       fill: white;
     }

@@ -18,27 +18,30 @@ import { randomRange } from "./utils/utils";
 export default {
   data() {
     return {
-      data: {
-        defi: {
+      data: [
+        {
           apys: [
             { tier: { min: 0, max: 100 }, apy: 0.1 },
             { tier: { min: 100, max: 1000 }, apy: 0.2 },
           ],
           compound: false,
+          color: "#6884DC",
         },
-        staking: {
+        {
           apys: [
             { tier: { min: 0, max: 100 }, apy: 0.1 },
             { tier: { min: 100, max: 1000 }, apy: 0.2 },
             { tier: { min: 1000, max: Number.MAX_VALUE }, apy: 0.5 },
           ],
           compound: true,
+          color: "#925BCA",
         },
-        liquid: {
+        {
           apys: [{ tier: { min: 0, max: Number.MAX_VALUE }, apy: 0.05 }],
           compound: false,
+          color: "#EEAD00",
         },
-      },
+      ],
       selected: 2,
       dark: false,
     };
@@ -55,12 +58,32 @@ export default {
       this.selected = selected;
     },
     handleChange() {
-      const data = {};
+      const data = [];
+
+      const radomRgbColor = () => {
+        //随机生成RGB颜色
+        const arr = [];
+        for (let i = 0; i < 3; i++) {
+          // 暖色
+          // arr.push(Math.floor(Math.random() * 128 + 64));
+          // 亮色
+          arr.push(Math.floor(Math.random() * 128 + 128));
+        }
+        const [r, g, b] = arr;
+        // rgb颜色
+        // var color=`rgb(${r},${g},${b})`;
+        // 16进制颜色
+        const color = `#${r.toString(16).length > 1 ? r.toString(16) : "0" + r.toString(16)}${g.toString(16).length > 1 ? g.toString(16) : "0" + g.toString(16)}${
+          b.toString(16).length > 1 ? b.toString(16) : "0" + b.toString(16)
+        }`;
+        return color;
+      };
 
       const fill = () => {
         let generator = {
           apys: [],
           compound: Math.random() > 0.5,
+          color: radomRgbColor(),
         };
         let apy = randomRange(0, 0.3);
         generator.apys.push({ tier: { min: 0, max: 100 }, apy });
@@ -71,18 +94,23 @@ export default {
         return generator;
       };
 
-      if (Math.random() <= 0.8) {
-        data.defi = fill();
-      }
-      if (Math.random() <= 0.8) {
-        data.staking = fill();
-      }
-      if (Math.random() <= 0.8) {
-        data.liquid = fill();
-      }
+      // if (Math.random() <= 0.8) {
+      //   data.defi = fill();
+      // }
+      // if (Math.random() <= 0.8) {
+      //   data.staking = fill();
+      // }
+      // if (Math.random() <= 0.8) {
+      //   data.liquid = fill();
+      // }
 
-      if (!data.defi && !data.staking && !data.liquid) {
-        data.staking = fill();
+      // if (!data.defi && !data.staking && !data.liquid) {
+      //   data.staking = fill();
+      // }
+
+      const count = randomRange(0, 10);
+      for (let i = 0; i < count; i++) {
+        data.push(fill());
       }
 
       this.data = data;

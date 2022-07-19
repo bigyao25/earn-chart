@@ -18,7 +18,7 @@ type GetProfitByApyOptions = {
 };
 
 /**
- * 数字缩写
+ * 数字缩写(10000->10K, 1000000->1M)
  * @param num 待转换数字
  * @param digits 保留小数位数
  */
