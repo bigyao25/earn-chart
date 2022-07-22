@@ -1,6 +1,6 @@
 <template>
   <div class="chart relative">
-    <svg id="_mr_chart" :height="height" :width="width"></svg>
+    <svg :id="svgId" :height="height" :width="width" class="_mr_chart"></svg>
   </div>
 </template>
 
@@ -23,6 +23,7 @@ import { active } from "d3-transition";
  */
 export default {
   props: {
+    svgId: { type: String, default: "_mr_chart" },
     height: { type: Number, default: 400 },
     width: { type: Number, default: 500 },
     data: Object,
@@ -40,7 +41,8 @@ export default {
     init() {
       this.fillData();
 
-      const svg = select("#_mr_chart");
+      const svg = select(`#${this.svgId}`);
+      console.log(svg);
       svg.classed("dark", this.dark);
 
       svg.selectAll("*").remove();
@@ -106,18 +108,20 @@ export default {
 </script>
 
 <style lang="less">
-#_mr_chart {
-  #bg {
-    fill: #ffffff;
-  }
-  text {
-    font-family: Mulish Bold;
-    letter-spacing: -0.015em;
-  }
-
-  &.dark {
+.chart {
+  ._mr_chart {
     #bg {
-      fill: #140b22;
+      fill: #ffffff;
+    }
+    text {
+      font-family: Mulish Bold;
+      letter-spacing: -0.015em;
+    }
+
+    &.dark {
+      #bg {
+        fill: #140b22;
+      }
     }
   }
 }

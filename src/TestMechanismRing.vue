@@ -1,6 +1,6 @@
 <template>
   <div class="body">
-    <MechanismRingChart :data="data" :width="89" :height="89" :dark="dark" />
+    <MechanismRingChart :svg-id="'test-mr-chart'" :data="data" :width="89" :height="89" :dark="dark" />
 
     <div class="right">
       <button @click="handleStyle1">Style 1</button>
