@@ -56,7 +56,7 @@ export default {
     handleStyle3() {
       this.data = {
         ranges: [{ range: { min: 0, max: 1 }, color: "#EEAD00" }],
-        info: { text: 1, color: "#EEAD00" },
+        info: { text: 0, color: "#EEAD00" },
         defaultColor: "#DDDCEA",
       };
     },

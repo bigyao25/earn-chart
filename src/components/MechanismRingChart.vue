@@ -69,7 +69,7 @@ export default {
         .attr("d", d => myArc(d))
         .attr("fill", d => d.data.color);
 
-      if (this.data.info?.text) {
+      if (this.data.info?.text !== undefined) {
         const num = this.data.info?.text;
         root
           .append("text")
@@ -91,7 +91,7 @@ export default {
     fillData() {
       const ranges = this.data.ranges.sort((x, y) => x.range.min - y.range.min);
       if (ranges[ranges.length - 1].range.max < 1) {
-        ranges.push({ range: { min: ranges[ranges.length - 1].range.max, max: 1 }, color: "red" });
+        ranges.push({ range: { min: ranges[ranges.length - 1].range.max, max: 1 }, color: "#DDDCEA" });
       }
       this.arcData = ranges.map(r => ({ radius: r.range.max - r.range.min, color: r.color }));
     },
