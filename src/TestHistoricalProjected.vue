@@ -111,7 +111,7 @@ export default {
     handleClickTest() {
       this.data = {
         historical: [
-          { date: dayjs("2022-06-01"), value: 0 },
+          { date: dayjs("2022-06-01"), value: 265 },
           { date: dayjs("2022-06-02"), value: 0 },
           { date: dayjs("2022-06-03"), value: 0 },
           { date: dayjs("2022-06-04"), value: 0 },
@@ -119,15 +119,15 @@ export default {
           { date: dayjs("2022-06-06"), value: 0 },
           { date: dayjs("2022-06-07"), value: 0 },
         ],
-        today: { date: dayjs("2022-06-08"), value: 0.06 },
+        today: { date: dayjs("2022-06-08"), value: 265.42235690605753 },
         projectedCurrent: [
-          { date: dayjs("2022-06-09"), value: 0.115 },
-          { date: dayjs("2022-06-10"), value: 0.125 },
-          { date: dayjs("2022-06-11"), value: 0.135 },
-          { date: dayjs("2022-06-12"), value: 0.155 },
-          { date: dayjs("2022-06-13"), value: 0.165 },
-          { date: dayjs("2022-06-14"), value: 0.175 },
-          { date: dayjs("2022-06-15"), value: 0.195 },
+          { date: dayjs("2022-06-09"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-10"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-11"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-12"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-13"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-14"), value: 265.42235690605753 },
+          { date: dayjs("2022-06-15"), value: 265.42235690605753 },
         ],
         projectedPotential: [
           { date: dayjs("2022-06-09"), value: 0.32 },

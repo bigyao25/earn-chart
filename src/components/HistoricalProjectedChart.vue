@@ -20,11 +20,16 @@
 import dayjs from "dayjs";
 import { select } from "d3-selection";
 import { scaleUtc, scaleLinear } from "d3-scale";
-import { line, curveLinear, curveBasis, curveCardinal, stack, area, symbol, symbolSquare } from "d3-shape";
+import { line, curveLinear, curveBasis, curveCardinal, curveMonotoneX, curveCatmullRom, stack, area, symbol, symbolSquare } from "d3-shape";
 import "d3-transition";
 import { Decimal } from "decimal.js";
 // import { format } from "d3-format";
 import { abridgeNumber } from "../utils/utils";
+
+// curveCardinal
+// curveMonotoneX: x轴单调
+// curveCatmullRom
+const myCurve = curveBasis;
 
 export default {
   props: {
@@ -157,7 +162,7 @@ export default {
           .text(`$${abridgeNumber(n.toNumber())}`)
           .attr("text-anchor", "start")
           .attr("dominant-baseline", "middle")
-          .attr("font-family", "Mulish")
+          .attr("font-family", "Mulish Regular")
           .attr("font-size", this.widthes.tickValueFontSize)
           .attr("font-weight", this.widthes.tickValueFontWeight);
       });
@@ -174,33 +179,33 @@ export default {
         .attr("marker-end", "url(#hp-axisDot)")
         .attr("marker-start", "url(#hp-axisDot)");
       // 中点
-      root
-        .append("line")
-        .attr("class", "axis-center-line")
-        .attr("x1", this.xScale(this.data.today.date) - 65)
-        .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("x2", this.xScale(this.data.today.date))
-        .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke-width", 1.2)
-        .attr("marker-end", "url(#axisDot)");
-      root
-        .append("line")
-        .attr("class", "axis-center-line")
-        .attr("x1", this.xScale(this.data.today.date))
-        .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("x2", this.xScale(this.data.today.date) + 65)
-        .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
-        .attr("stroke-width", 1.2)
-        .attr("marker-start", "url(#axisDot)");
+      // root
+      //   .append("line")
+      //   .attr("class", "axis-center-line")
+      //   .attr("x1", this.xScale(this.data.today.date) - 65)
+      //   .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+      //   .attr("x2", this.xScale(this.data.today.date))
+      //   .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+      //   .attr("stroke-width", 1.2)
+      //   .attr("marker-end", "url(#axisDot)");
+      // root
+      //   .append("line")
+      //   .attr("class", "axis-center-line")
+      //   .attr("x1", this.xScale(this.data.today.date))
+      //   .attr("y1", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+      //   .attr("x2", this.xScale(this.data.today.date) + 65)
+      //   .attr("y2", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height)
+      //   .attr("stroke-width", 1.2)
+      //   .attr("marker-start", "url(#axisDot)");
       // Historical
       root
         .append("text")
         .text("Historical")
         .attr("class", "text-historical")
         .attr("x", this.xScale(this.data.today.date) - 60)
-        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 12)
         .attr("filter", "url(#solid)")
-        .attr("font-family", "Mulish")
+        .attr("font-family", "Mulish Regular")
         .attr("font-size", this.widthes.tickValueFontSize)
         .attr("font-weight", this.widthes.tickValueFontWeight);
       // Projected
@@ -209,9 +214,9 @@ export default {
         .text("Projected")
         .attr("class", "text-projected")
         .attr("x", this.xScale(this.data.today.date) + 8)
-        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 4)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 12)
         .attr("filter", "url(#solid)")
-        .attr("font-family", "Mulish")
+        .attr("font-family", "Mulish Regular")
         .attr("font-size", this.widthes.tickValueFontSize)
         .attr("font-weight", this.widthes.tickValueFontWeight);
       // x 文字
@@ -314,7 +319,7 @@ export default {
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
         .y1(d => this.yScale(d[1] - d[0]))
-        .curve(curveCardinal);
+        .curve(myCurve);
       root = svg.append("g");
       root
         .attr("id", "leftArea")
@@ -330,7 +335,7 @@ export default {
         .x(d => this.xScale(d.data.date))
         .y0(d => this.yScale(d[0]))
         .y1(d => this.yScale(d[1]))
-        .curve(curveCardinal);
+        .curve(myCurve);
       root = svg.append("g");
       root
         .attr("id", "rightArea")
@@ -351,7 +356,7 @@ export default {
       this.lineH = line()
         .x(d => this.xScale(dayjs(d.date)))
         .y(d => this.yScale(d.value))
-        .curve(curveCardinal);
+        .curve(myCurve);
       // historical
       root.append("path").datum(this.historicalData).attr("id", "chartH").attr("d", this.lineH).attr("stroke", this.colors.lineHistorical).attr("stroke-width", 3).attr("fill", "transparent");
       // projectedCurrent
