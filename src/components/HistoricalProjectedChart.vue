@@ -204,7 +204,7 @@ export default {
         .text("Historical")
         .attr("class", "text-historical")
         .attr("x", this.xScale(this.data.today.date) - 60)
-        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 12)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 13)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish Regular")
         .attr("font-size", this.widthes.tickValueFontSize)
@@ -215,7 +215,7 @@ export default {
         .text("Projected")
         .attr("class", "text-projected")
         .attr("x", this.xScale(this.data.today.date) + 8)
-        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 12)
+        .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 13)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish Regular")
         .attr("font-size", this.widthes.tickValueFontSize)
@@ -390,7 +390,7 @@ export default {
         .attr("x1", this.xScale(this.data.today.date))
         .attr("y1", this.widthes.axisDot)
         .attr("x2", this.xScale(this.data.today.date))
-        .attr("y2", this.widthes.axisDot + this.chartArea.size.height)
+        .attr("y2", this.widthes.axisDot + this.chartArea.size.height + this.widthes.marginTop)
         .attr("stroke-dasharray", "8,8")
         .attr("stroke-width", 1);
 
