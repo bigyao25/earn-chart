@@ -1,6 +1,7 @@
 <template>
   <div class="body">
-    <HistoricalProjectedChart :svgId="'test-hp-chart'" :data="data" :width="378" :height="270" :dark="dark" />
+    <HistoricalProjectedChart :svgId="'test-hp-chart1'" :data="data1" :width="500" :height="400" :dark="dark" />
+    <HistoricalProjectedChart :svgId="'test-hp-chart2'" :data="data2" :width="378" :height="270" :dark="dark" />
     <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
     <div class="right">
@@ -44,12 +45,42 @@ import HistoricalProjectedChart from "./components/HistoricalProjectedChart.vue"
 export default {
   data() {
     return {
-      data: {
+      data1: {
+        historical: [
+          { date: dayjs("2000-06-01"), value: 265 },
+          { date: dayjs("2000-06-02"), value: 0 },
+          { date: dayjs("2000-06-03"), value: 0 },
+          { date: dayjs("2000-06-04"), value: 0 },
+          { date: dayjs("2000-06-05"), value: 0 },
+          { date: dayjs("2000-06-06"), value: 0 },
+          { date: dayjs("2000-06-07"), value: 0 },
+        ],
+        today: { date: dayjs("2000-06-08"), value: 265.42235690605753 },
+        projectedCurrent: [
+          { date: dayjs("2000-06-09"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-10"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-11"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-12"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-13"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-14"), value: 265.42235690605753 },
+          { date: dayjs("2000-06-15"), value: 265.42235690605753 },
+        ],
+        projectedPotential: [
+          { date: dayjs("2000-06-09"), value: 0.32 },
+          { date: dayjs("2000-06-10"), value: 0.48 },
+          { date: dayjs("2000-06-11"), value: 0.64 },
+          { date: dayjs("2000-06-12"), value: 0.8 },
+          { date: dayjs("2000-06-13"), value: 0.96 },
+          { date: dayjs("2000-06-14"), value: 1.12 },
+          { date: dayjs("2000-06-15"), value: 1.34 },
+        ],
+      },
+      data2: {
         historical: [
           { date: dayjs("2022-06-01"), value: 0 },
           { date: dayjs("2022-06-02"), value: 0 },
           { date: dayjs("2022-06-03"), value: 0 },
-          { date: dayjs("2022-06-04"), value: 0 },
+          { date: dayjs("2022-06-04"), value: 0.0111 },
           { date: dayjs("2022-06-05"), value: 0 },
           { date: dayjs("2022-06-06"), value: 0 },
           { date: dayjs("2022-06-07"), value: 0 },
@@ -109,7 +140,7 @@ export default {
       this.fillData(365);
     },
     handleClickTest() {
-      this.data = {
+      this.data2 = {
         historical: [
           { date: dayjs("2022-06-01"), value: 265 },
           { date: dayjs("2022-06-02"), value: 0 },
@@ -193,7 +224,7 @@ export default {
         preValuePP = valuePP;
       }
 
-      this.data = { historical, today: { date: today, value: todayValue }, projectedCurrent, projectedPotential };
+      this.data1 = { historical, today: { date: today, value: todayValue }, projectedCurrent, projectedPotential };
     },
   },
   components: { HistoricalProjectedChart },

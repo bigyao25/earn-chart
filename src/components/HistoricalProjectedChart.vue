@@ -26,10 +26,11 @@ import { Decimal } from "decimal.js";
 // import { format } from "d3-format";
 import { abridgeNumber } from "../utils/utils";
 
-// curveCardinal
+// curveBasis: (出现峰值时无法到达)
+// curveCardinal: (严重下陷)
 // curveMonotoneX: x轴单调
-// curveCatmullRom
-const myCurve = curveBasis;
+// curveCatmullRom: (略微下陷)
+const myCurve = curveMonotoneX;
 
 export default {
   props: {
@@ -605,18 +606,18 @@ export default {
       const dateToday = this.data.today.date;
       const dateMin = this.data.historical[0].date;
       const dateMax = this.data.projectedPotential.slice(-1)[0].date;
-      select("#x-tick-min").text(dateMin.format("MMM D, YYYY"));
-      select("#x-tick-today").text(dateToday.format("MMM D, YYYY"));
-      select("#x-tick-max").text(dateMax.format("MMM D, YYYY"));
+      select(`#${this.svgId} #x-tick-min`).text(dateMin.format("MMM D, YYYY"));
+      select(`#${this.svgId} #x-tick-today`).text(dateToday.format("MMM D, YYYY"));
+      select(`#${this.svgId} #x-tick-max`).text(dateMax.format("MMM D, YYYY"));
 
       //#endregion
 
       //#region area
 
       this.initAreas();
-
+      console.log(333, this.svgId);
       // left
-      const leftArea = select("#leftArea");
+      const leftArea = select(`#${this.svgId} #leftArea`);
       leftArea.selectAll("path").data([]).exit().remove();
       leftArea
         .selectAll("path")
@@ -629,7 +630,7 @@ export default {
         .attr("fill", (d, i) => this.leftFill[i]);
 
       // right
-      const rightArea = select("#rightArea");
+      const rightArea = select(`#${this.svgId} #rightArea`);
       rightArea.selectAll("path").data([]).exit().remove();
       rightArea
         .selectAll("path")
@@ -644,13 +645,13 @@ export default {
       //#endregion
 
       //#region 曲线
-      select("#chartH").datum(this.historicalData).transition().attr("d", this.lineH);
-      select("#chartPC").datum(this.projectedCurrentData).transition().attr("d", this.lineH);
-      select("#chartPP").datum(this.projectedPotentialData).transition().attr("d", this.lineH);
+      select(`#${this.svgId} #chartH`).datum(this.historicalData).transition().attr("d", this.lineH);
+      select(`#${this.svgId} #chartPC`).datum(this.projectedCurrentData).transition().attr("d", this.lineH);
+      select(`#${this.svgId} #chartPP`).datum(this.projectedPotentialData).transition().attr("d", this.lineH);
       //#endregion
 
       //#region today
-      select("#today-dot")
+      select(`#${this.svgId} #today-dot`)
         .transition()
         .attr("cx", this.xScale(dayjs(this.data.today.date)))
         .attr("cy", this.yScale(this.data.today.value))
