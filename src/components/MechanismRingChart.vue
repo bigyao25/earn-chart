@@ -111,7 +111,7 @@ export default {
 .chart {
   ._mr_chart {
     #bg {
-      fill: #ffffff;
+      fill: rgba(255, 255, 255, 0);
     }
     text {
       font-family: Mulish Bold;
@@ -120,7 +120,7 @@ export default {
 
     &.dark {
       #bg {
-        fill: #140b22;
+        fill: rgba(255, 255, 255, 0);
       }
     }
   }
