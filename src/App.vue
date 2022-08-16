@@ -39,13 +39,13 @@ export default {
 
 <style lang="less" scoped>
 /* mulish -latin */
-@font-face {
-  font-family: "Mulish";
-  font-style: normal;
-  font-weight: normal;
-  font-display: swap;
-  src: url(/fonts/mulish-v7-latin-regular.woff?t=1641532682023) format("woff"), url(./fonts/mulish-v7-latin-regular.woff2?t=1641532682023) format("woff2");
-}
+// @font-face {
+//   font-family: "Mulish";
+//   font-style: normal;
+//   font-weight: normal;
+//   font-display: swap;
+//   src: url(/fonts/mulish-v7-latin-regular.woff?t=1641532682023) format("woff"), url(./fonts/mulish-v7-latin-regular.woff2?t=1641532682023) format("woff2");
+// }
 
 /* mulish-regular -latin */
 @font-face {

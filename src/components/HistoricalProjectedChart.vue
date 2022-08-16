@@ -537,7 +537,7 @@ export default {
         .text(dayjs(tipDate).format("MMM D"))
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 20)
-        .attr("style", "font-family: Mulish; font-size: 12; font-weight: 400;")
+        .attr("style", "font-family: Mulish Regular; font-size: 12; font-weight: 400;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
 
