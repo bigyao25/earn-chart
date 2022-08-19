@@ -404,9 +404,9 @@ export default {
       //#region hover
 
       svg.on("pointermove", this.pointermoved);
-      svg.on("mouseleave", () => {
-        select(`#${this.svgId}`).selectAll("#hover").transition().duration(300).remove();
-      });
+      // svg.on("mouseleave", () => {
+      //   select(`#${this.svgId}`).selectAll("#hover").transition().duration(300).remove();
+      // });// DEBUG
 
       //#endregion
     },
@@ -448,18 +448,19 @@ export default {
       drawDiamond(this.xScale(date), this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(sizeDiamond) / 2, sizeDiamond, root);
 
       // shadow area
-      root
-        .append("rect")
-        .attr("x", this.xScale(date))
-        .attr("y", this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(sizeDiamond) / 2)
-        .attr("width", this.xScale(date.add(1, "day")) - this.xScale(date))
-        .attr("height", this.chartArea.size.height + Math.sqrt(sizeDiamond) / 2)
-        .attr("fill", "rgba(85, 170, 0, 0.1)");
+      // root
+      //   .append("rect")
+      //   .attr("x", this.xScale(date))
+      //   .attr("y", this.chartArea.bottomLeft.y - this.chartArea.size.height - Math.sqrt(sizeDiamond) / 2)
+      //   .attr("width", this.xScale(date.add(1, "day")) - this.xScale(date))
+      //   .attr("height", this.chartArea.size.height + Math.sqrt(sizeDiamond) / 2)
+      //   .attr("fill", "rgba(85, 170, 0, 0.1)");
 
       // dot
       const itemH = this.historicalData.find(m => m.date.isSame(date, "date"));
       if (itemH) {
         this.drawDot(root, date, itemH.value, this.colors.lineHistorical, "rgba(85, 170, 0, 0.9)");
+        this.drawTip1(root, date, itemH.value);
         return;
       }
       const itemPC = this.projectedCurrentData.find(m => m.date.isSame(date, "date"));
@@ -467,6 +468,7 @@ export default {
       if (itemPC && itemPP) {
         this.drawDot(root, date, itemPC.value, this.colors.lineProjectedCurrent, "rgba(104, 132, 220, 0.9)");
         this.drawDot(root, date, itemPP.value, this.colors.lineProjectedPotential, "rgba(146, 91, 202, 0.9)");
+        this.drawTip2(root, date, itemPC.value, itemPP.value);
       }
     },
 
@@ -483,27 +485,97 @@ export default {
         .attr("filter", `drop-shadow(0 0 8px ${filterColor})`)
         .attr("data-date", date)
         .attr("data-value", value);
-
-      const $vue = this;
-      obj.on("mouseover", function (d) {
-        $vue.drawTip(this, root);
-      });
-
-      obj.on("mouseout", function (d) {
-        let tip = select("#tip");
-        tip.transition().duration(300).remove();
-      });
     },
 
-    drawTip(obj, root) {
+    drawTip2(root, date, valuePC, valuePP) {
       let tip = select("#tip");
-      if (!tip.empty()) return;
+      const tipWidth = 130;
+      const tipHeight = 95;
+      const cx = this.xScale(date);
+      const cyPC = this.yScale(valuePC);
+      const cyPP = this.yScale(valuePP);
 
-      let self = select(obj);
+      let tipX = cx - tipWidth / 2;
+      let tipY = cyPP - tipHeight - 10;
+      if (tipX < this.chartArea.bottomLeft.x) {
+        tipX = this.chartArea.bottomLeft.x;
+      } else if (tipX + tipWidth > this.chartArea.bottomLeft.x + this.chartArea.size.width) {
+        tipX = cx - tipWidth - 10;
+      }
+      if (tipY < 0) {
+        if (tipX === cx - tipWidth - 10) {
+          tipY = cyPP;
+        } else {
+          tipY = cyPC + 10;
+        }
+      }
+
+      tip = root.append("g").attr("id", "tip").attr("x", tipX).attr("y", tipY);
+
+      const rect = tip
+        .append("rect")
+        .attr("id", "tip")
+        .attr("x", tipX)
+        .attr("y", tipY)
+        .attr("rx", 8)
+        .attr("width", tipWidth)
+        .attr("height", tipHeight)
+        .attr("filter", "drop-shadow(-3px 5px 10px rgba(46, 31, 61, 0.1))");
+
+      tip
+        .append("text")
+        .text(dayjs(date).format("MMM D"))
+        .attr("dx", tipX + tipWidth / 2)
+        .attr("dy", tipY + 20)
+        .attr("style", "font-family: Mulish Regular; font-size: 12px; font-weight: 400;")
+        .attr("text-anchor", "middle")
+        .attr("fill", this.colors.fontTip);
+
+      // Suggested Rewards
+      tip
+        .append("text")
+        .text("Suggested Rewards")
+        .attr("dx", tipX + tipWidth / 2)
+        .attr("dy", tipY + 35)
+        .attr("style", "font-family: Mulish Bold; font-size: 12px;")
+        .attr("text-anchor", "middle")
+        .attr("fill", this.colors.fontTip);
+
+      tip
+        .append("text")
+        .text(`$${abridgeNumber(valuePC)}`)
+        .attr("dx", tipX + tipWidth / 2)
+        .attr("dy", tipY + 50)
+        .attr("style", "font-family: Mulish Bold; font-size: 14px;")
+        .attr("text-anchor", "middle")
+        .attr("class", "text-pc");
+
+      // Projected Rewards
+      tip
+        .append("text")
+        .text("Projected Rewards")
+        .attr("dx", tipX + tipWidth / 2)
+        .attr("dy", tipY + 70)
+        .attr("style", "font-family: Mulish Bold; font-size: 12px;")
+        .attr("text-anchor", "middle")
+        .attr("fill", this.colors.fontTip);
+
+      tip
+        .append("text")
+        .text(`$${abridgeNumber(valuePP)}`)
+        .attr("dx", tipX + tipWidth / 2)
+        .attr("dy", tipY + 85)
+        .attr("style", "font-family: Mulish Bold; font-size: 14px;")
+        .attr("text-anchor", "middle")
+        .attr("class", "text-pp");
+    },
+
+    drawTip1(root, date, value) {
+      let tip = select("#tip");
       const tipWidth = 130;
       const tipHeight = 70;
-      const cx = self.property("cx").baseVal.value;
-      const cy = self.property("cy").baseVal.value;
+      const cx = this.xScale(date);
+      const cy = this.yScale(value);
 
       let tipX = cx - tipWidth / 2;
       let tipY = cy - tipHeight - 10;
@@ -529,15 +601,15 @@ export default {
         .attr("height", tipHeight)
         .attr("filter", "drop-shadow(-3px 5px 10px rgba(46, 31, 61, 0.1))");
 
-      const tipDate = self.attr("data-date");
-      const tipValue = self.attr("data-value");
+      const tipDate = date;
+      const tipValue = value;
 
       tip
         .append("text")
         .text(dayjs(tipDate).format("MMM D"))
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 20)
-        .attr("style", "font-family: Mulish Regular; font-size: 12; font-weight: 400;")
+        .attr("style", "font-family: Mulish Regular; font-size: 12px; font-weight: 400;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
 
@@ -546,7 +618,7 @@ export default {
         .text("Rewards")
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 40)
-        .attr("style", "font-family: Mulish Bold; font-size: 14;")
+        .attr("style", "font-family: Mulish Bold; font-size: 14px;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
 
@@ -556,7 +628,7 @@ export default {
         .text(`$${abridgeNumber(tipValue)}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 60)
-        .attr("style", "font-family: Mulish Bold; font-size: 14;")
+        .attr("style", "font-family: Mulish Bold; font-size: 14px;")
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
     },
@@ -615,7 +687,7 @@ export default {
       //#region area
 
       this.initAreas();
-      console.log(333, this.svgId);
+      // console.log(333, this.svgId);
       // left
       const leftArea = select(`#${this.svgId} #leftArea`);
       leftArea.selectAll("path").data([]).exit().remove();
@@ -702,6 +774,12 @@ export default {
       text {
         fill: #2c2236;
         stroke: none;
+      }
+      .text-pc {
+        fill: #6884dc;
+      }
+      .text-pp {
+        fill: #925bca;
       }
     }
 
