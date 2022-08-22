@@ -289,6 +289,7 @@ export default {
 
       this.selectedIndex = selected;
       this.haldleSelection();
+      this.$emit("axisXClick", selected);
     },
   },
   watch: {
