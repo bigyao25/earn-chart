@@ -404,9 +404,9 @@ export default {
       //#region hover
 
       svg.on("pointermove", this.pointermoved);
-      // svg.on("mouseleave", () => {
-      //   select(`#${this.svgId}`).selectAll("#hover").transition().duration(300).remove();
-      // });// DEBUG
+      svg.on("mouseleave", () => {
+        select(`#${this.svgId}`).selectAll("#hover").transition().duration(300).remove();
+      }); // comment if DEBUG
 
       //#endregion
     },

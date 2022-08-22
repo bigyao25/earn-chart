@@ -1,6 +1,6 @@
 <template>
   <div class="chart relative">
-    <svg id="_mechanism_chart" :height="height" :width="width"></svg>
+    <svg id="_mechanism_chart" ref="chartSvg" :height="height" :width="width"></svg>
   </div>
 </template>
 
@@ -105,7 +105,7 @@ export default {
 
       this.draw();
 
-      // svg.on("click", this.handleClick);
+      svg.on("click", this.handleClick);
     },
 
     fillData() {
@@ -130,7 +130,7 @@ export default {
     },
 
     initChart() {
-      const marginRight = 12;
+      const marginRight = 14;
 
       this.chartArea = {
         bottomLeft: { x: this.widthes.axisDot, y: this.height - this.widthes.xTickeValueArea - this.widthes.axisDot },
@@ -169,7 +169,7 @@ export default {
       const axisX = svg
         .append("g")
         .attr("id", "axis-x")
-        .attr("transform", `translate(0, ${this.widthes.axisDot + this.chartArea.size.height})`)
+        .attr("transform", `translate(${this.chartArea.bottomLeft.x}, ${this.widthes.axisDot + this.chartArea.size.height})`)
         .call(this.xAxis);
       axisX.selectAll(".tick").on("click", event => {
         const selected = parseInt(event.target.innerHTML.substring(0, 1));
@@ -180,14 +180,14 @@ export default {
       axisX.select("path").attr("marker-end", "url(#m-axisDot)").attr("marker-start", "url(#axisDot)");
       axisX.selectAll(".tick").select("text");
       // 修正x轴两端刻度
-      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width - 8}, 0)`);
+      axisX.selectAll(`.tick:nth-child(6)`).attr("transform", `translate(${this.chartArea.bottomLeft.x + this.widthes.axisDot + this.chartArea.size.width - 10}, 0)`);
       axisX.selectAll(".tick:nth-child(2)").remove();
 
       // y
       const axisY = svg
         .append("g")
         .attr("id", "axis-y")
-        .attr("transform", `translate(${this.widthes.axisDot + this.chartArea.size.width}, 0)`)
+        .attr("transform", `translate(${this.chartArea.bottomLeft.x + this.widthes.axisDot + this.chartArea.size.width}, 0)`)
         .call(this.yAxis);
       axisY.select("path").attr("marker-end", "url(#m-axisDot)").attr("marker-start", "url(#axisDot)");
 
@@ -197,9 +197,9 @@ export default {
         grids
           .append("line")
           .attr("class", "grid")
-          .attr("x1", this.xScale(i))
+          .attr("x1", this.chartArea.bottomLeft.x + this.xScale(i))
           .attr("y1", this.widthes.axisDot + this.chartArea.size.height)
-          .attr("x2", this.xScale(i))
+          .attr("x2", this.chartArea.bottomLeft.x + this.xScale(i))
           .attr("y2", this.widthes.axisDot)
           // .attr("stroke", this.colors.axisLine)
           .attr("stroke-dasharray", "8,8")
@@ -280,7 +280,13 @@ export default {
     },
 
     handleClick(event) {
-      const selected = Math.ceil(this.xScale.invert(event.x));
+      const svgLeft = this.$refs.chartSvg.getBoundingClientRect().left;
+      const selected = Math.ceil(this.xScale.invert(event.x - svgLeft - this.chartArea.bottomLeft.x));
+      if (selected < 1 || selected > 4) return;
+
+      const svgTop = this.$refs.chartSvg.getBoundingClientRect().top;
+      if (event.y >= svgTop + this.widthes.axisDot + this.chartArea.size.height) return;
+
       this.selectedIndex = selected;
       this.haldleSelection();
     },
