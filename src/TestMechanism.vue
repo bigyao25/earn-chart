@@ -6,6 +6,7 @@
       <button @click="handleChange">Change Data</button>
       <span>Selected Tick: {{ selected }}</span>
       <button @click="handleChangeMode">Change Mode</button>
+      <button @click="handleChangeSelect">Change Select</button>
     </div>
   </div>
 </template>
@@ -117,6 +118,9 @@ export default {
     },
     handleChangeMode() {
       this.dark = !this.dark;
+    },
+    handleChangeSelect() {
+      this.selected = (this.selected % 4) + 1;
     },
   },
   components: { MechanismChart },

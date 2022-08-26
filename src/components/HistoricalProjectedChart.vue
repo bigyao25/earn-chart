@@ -46,7 +46,7 @@ export default {
         axisDot: 2.5,
         axisLineThickness: 1,
         xTickeValueArea: 30,
-        yTickeValueArea: 30,
+        yTickeValueArea: 45,
         marginTop: 8,
         tickValueFontSize: 12,
         tickValueFontWeight: 400,
@@ -157,11 +157,11 @@ export default {
           .attr("stroke-width", 1);
         root
           .append("text")
-          .attr("x", 0)
+          .attr("x", this.widthes.yTickeValueArea - 2)
           .attr("y", this.yScale(n.toNumber()))
           // .text(`$${format(".2~s")(n.toNumber()).toUpperCase()}`)
           .text(`$${abridgeNumber(n.toNumber())}`)
-          .attr("text-anchor", "start")
+          .attr("text-anchor", "end")
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish Regular")
           .attr("font-size", this.widthes.tickValueFontSize)

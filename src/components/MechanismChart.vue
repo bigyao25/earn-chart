@@ -301,6 +301,15 @@ export default {
       this.init();
       this.haldleSelection();
     },
+    selected: {
+      handler(n, o) {
+        if (n !== o) {
+          this.init();
+          this.selectedIndex = this.selected === undefined ? -1 : this.selected;
+          this.haldleSelection();
+        }
+      },
+    },
   },
 };
 </script>
