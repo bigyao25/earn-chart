@@ -71,7 +71,7 @@ export default {
       this.initScale();
 
       const svg = select("#_mechanism_chart");
-      svg.attr("viewBox", [0, 0, this.width, this.height]).attr("style", "max-width: 100%; height: auto; height: intrinsic;").attr("font-family", "Mulish Bold").attr("font-size", 14);
+      svg.attr("viewBox", [0, 0, this.width, this.height]).attr("style", "max-width: 100%; height: auto; height: intrinsic;").attr("font-family", "Mulish Bold").attr("font-size", "14px");
       // .on("touchstart", event => event.preventDefault())
       // .on("pointermove", pointermoved);
 

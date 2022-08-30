@@ -46,7 +46,7 @@ export default {
         axisDot: 2.5,
         axisLineThickness: 1,
         xTickeValueArea: 30,
-        yTickeValueArea: 45,
+        yTickeValueArea: 50,
         marginTop: 8,
         tickValueFontSize: 12,
         tickValueFontWeight: 400,
@@ -164,7 +164,7 @@ export default {
           .attr("text-anchor", "end")
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish Regular")
-          .attr("font-size", this.widthes.tickValueFontSize)
+          .attr("font-size", `${this.widthes.tickValueFontSize}px`)
           .attr("font-weight", this.widthes.tickValueFontWeight);
       });
       //#endregion
@@ -207,7 +207,7 @@ export default {
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 13)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish Regular")
-        .attr("font-size", this.widthes.tickValueFontSize)
+        .attr("font-size", `${this.widthes.tickValueFontSize}px`)
         .attr("font-weight", this.widthes.tickValueFontWeight);
       // Projected
       root
@@ -218,7 +218,7 @@ export default {
         .attr("y", this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height + 13)
         .attr("filter", "url(#solid)")
         .attr("font-family", "Mulish Regular")
-        .attr("font-size", this.widthes.tickValueFontSize)
+        .attr("font-size", `${this.widthes.tickValueFontSize}px`)
         .attr("font-weight", this.widthes.tickValueFontWeight);
       // x 文字
       const dateToday = this.data.today.date;
@@ -231,7 +231,7 @@ export default {
         .attr("x", this.widthes.yTickeValueArea - this.widthes.axisDot / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickValueFontSize);
+        .attr("font-size", `${this.widthes.tickValueFontSize}px`);
       root
         .append("text")
         .text(dateToday.format("MMM D, YYYY"))
@@ -239,7 +239,7 @@ export default {
         .attr("x", this.widthes.yTickeValueArea + this.chartArea.size.width / 2)
         .attr("y", this.height - this.widthes.axisDot)
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickValueFontSize)
+        .attr("font-size", `${this.widthes.tickValueFontSize}px`)
         .attr("text-anchor", "middle");
       root
         .append("text")
@@ -249,7 +249,7 @@ export default {
         .attr("y", this.height - this.widthes.axisDot)
         .attr("text-anchor", "end")
         .attr("font-family", "Mulish Bold")
-        .attr("font-size", this.widthes.tickValueFontSize);
+        .attr("font-size", `${this.widthes.tickValueFontSize}px`);
 
       //#endregion
     },
