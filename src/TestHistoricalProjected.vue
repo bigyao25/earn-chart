@@ -10,7 +10,8 @@
         <button v-on:click="handleClick1M">1M</button>
         <button v-on:click="handleClick3M">3M</button>
         <button v-on:click="handleClick1Y">1Y</button>
-        <button v-on:click="handleClickTest">Test</button>
+        <button v-on:click="handleClickTest1">Test1</button>
+        <button v-on:click="handleClickTest2">Test2</button>
       </div>
 
       <div class="values">
@@ -139,7 +140,7 @@ export default {
     handleClick1Y() {
       this.fillData(365);
     },
-    handleClickTest() {
+    handleClickTest1() {
       this.data2 = {
         historical: [
           { date: dayjs("2022-06-01"), value: 265 },
@@ -168,6 +169,39 @@ export default {
           { date: dayjs("2022-06-13"), value: 0.96 },
           { date: dayjs("2022-06-14"), value: 1.12 },
           { date: dayjs("2022-06-15"), value: 1.34 },
+        ],
+      };
+    },
+
+    handleClickTest2() {
+      this.data2 = {
+        historical: [
+          { date: dayjs("2022-06-01"), value: 990 },
+          { date: dayjs("2022-06-02"), value: 1000 },
+          { date: dayjs("2022-06-03"), value: 1000 },
+          { date: dayjs("2022-06-04"), value: 1000 },
+          { date: dayjs("2022-06-05"), value: 1000 },
+          { date: dayjs("2022-06-06"), value: 1000 },
+          { date: dayjs("2022-06-07"), value: 1000 },
+        ],
+        today: { date: dayjs("2022-06-08"), value: 1000 },
+        projectedCurrent: [
+          { date: dayjs("2022-06-09"), value: 1030 },
+          { date: dayjs("2022-06-10"), value: 1060 },
+          { date: dayjs("2022-06-11"), value: 1090 },
+          { date: dayjs("2022-06-12"), value: 1120 },
+          { date: dayjs("2022-06-13"), value: 1150 },
+          { date: dayjs("2022-06-14"), value: 1180 },
+          { date: dayjs("2022-06-15"), value: 1210 },
+        ],
+        projectedPotential: [
+          { date: dayjs("2022-06-09"), value: 1110 },
+          { date: dayjs("2022-06-10"), value: 1210 },
+          { date: dayjs("2022-06-11"), value: 1320 },
+          { date: dayjs("2022-06-12"), value: 1420 },
+          { date: dayjs("2022-06-13"), value: 1530 },
+          { date: dayjs("2022-06-14"), value: 1630 },
+          { date: dayjs("2022-06-15"), value: 1740 },
         ],
       };
     },

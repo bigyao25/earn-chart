@@ -24,7 +24,7 @@ import { line, curveLinear, curveBasis, curveCardinal, curveMonotoneX, curveCatm
 import "d3-transition";
 import { Decimal } from "decimal.js";
 // import { format } from "d3-format";
-import { abridgeNumber } from "../utils/utils";
+import { abridgeNumber, makeTicks } from "../utils/utils";
 
 // curveBasis: (出现峰值时无法到达)
 // curveCardinal: (严重下陷)
@@ -71,6 +71,7 @@ export default {
       chartArea: {},
       xScale: {},
       yScale: {},
+      yValueRange: { min: 0, max: 0 },
       lineH: {},
       leftSeries: {},
       leftFill: [],
@@ -103,24 +104,29 @@ export default {
         .domain([allDates[0], allDates[allDates.length - 1].add(2, "hour")])
         .range([this.chartArea.bottomLeft.x, this.chartArea.bottomLeft.x + this.chartArea.size.width]);
 
-      const yValueRange = this.makeTike(Math.min(...allValues), Math.max(...allValues));
+      const valueMin = Math.min(...allValues);
+      const valueMax = Math.max(...allValues);
+      let yMin = valueMin - (valueMax - valueMin) / 3;
+      yMin = yMin > 0 ? yMin : 0;
+      const yMax = valueMax + (valueMax - valueMin) / 3;
+      this.yValueRange = { min: yMin, max: yMax };
       this.yScale = scaleLinear()
-        .domain([yValueRange[0], yValueRange[yValueRange.length - 1]])
+        .domain([yMin, yMax])
         .range([this.widthes.marginTop + this.widthes.axisDot + this.chartArea.size.height, this.widthes.marginTop + this.widthes.axisDot]);
     },
 
     initAreas() {
       const allValuesH = this.data.historical.map(m => m.value);
-      const leftStackData = this.data.historical.map(m => ({ date: m.date, baseline: Math.min(...allValuesH), historical: m.value }));
-      leftStackData.push({ date: this.data.today.date, baseline: Math.min(...allValuesH), historical: this.data.today.value }); // today
+      const leftStackData = this.data.historical.map(m => ({ date: m.date, baseline: this.yValueRange.min, historical: m.value }));
+      leftStackData.push({ date: this.data.today.date, baseline: this.yValueRange.min, historical: this.data.today.value }); // today
       const leftStack = stack().keys(["baseline", "historical"]);
       this.leftSeries = leftStack(leftStackData);
       this.leftFill = ["transparent", "url(#gradientH)"];
 
       const rightStackData = this.projectedCurrentData.map(m => ({
         date: m.date,
-        baseline: Math.min(...allValuesH),
-        projectedCurrent: m.value - Math.min(...allValuesH), // 得到差值
+        baseline: this.yValueRange.min,
+        projectedCurrent: m.value - this.yValueRange.min, // 得到差值
         projectedPotential: this.projectedPotentialData.find(p => p.date.isSame(m.date)).value - m.value, // 得到差值
       }));
       const rightStack = stack().keys(["baseline", "projectedCurrent", "projectedPotential"]);
@@ -144,23 +150,23 @@ export default {
         .attr("marker-end", "url(#hp-axisDot)")
         .attr("marker-start", "url(#hp-axisDot)");
 
-      const allValues = this.allData.map(m => m.value);
-      const yTicks = this.makeTike(Math.min(...allValues), Math.max(...allValues));
+      const yTicks = makeTicks(this.yValueRange.min, this.yValueRange.max, 2);
       yTicks.forEach(n => {
+        const tick = n < 1000 ? abridgeNumber(n, 2) : abridgeNumber(n, 1);
         root
           .append("line")
           .attr("x1", this.chartArea.bottomLeft.x)
-          .attr("y1", this.yScale(n.toNumber()))
+          .attr("y1", this.yScale(n))
           .attr("x2", this.chartArea.bottomLeft.x + this.chartArea.size.width)
-          .attr("y2", this.yScale(n.toNumber()))
+          .attr("y2", this.yScale(n))
           .attr("stroke-dasharray", "8,8")
           .attr("stroke-width", 1);
         root
           .append("text")
           .attr("x", this.widthes.yTickeValueArea - 2)
-          .attr("y", this.yScale(n.toNumber()))
+          .attr("y", this.yScale(n))
           // .text(`$${format(".2~s")(n.toNumber()).toUpperCase()}`)
-          .text(`$${abridgeNumber(n.toNumber())}`)
+          .text(`$${tick}`)
           .attr("text-anchor", "end")
           .attr("dominant-baseline", "middle")
           .attr("font-family", "Mulish Regular")
@@ -289,23 +295,24 @@ export default {
       whiteFilter.append("feFlood").attr("flood-color", this.dark ? this.colors.dark.background : this.colors.background);
       whiteFilter.append("feComposite").attr("in", "SourceGraphic").attr("operator", "atop");
 
-      const gradientH = defs.append("linearGradient").attr("id", "gradientH").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.05)");
-      // gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
-      gradientH.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(85, 170, 0, 0.3)");
-      gradientH.append("stop").attr("offset", "90%").attr("stop-color", "rgba(85, 170, 0, 0)");
+      const gradientH = defs.append("linearGradient").attr("id", "gradientH");
+      gradientH.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+      // gradientH.attr("gradientUnits", "userSpaceOnUse");
+      gradientH.attr("gradientUnits", "objectBoundingBox");
+      gradientH.append("stop").attr("offset", "37.58%").attr("stop-color", "rgba(85, 170, 0, 0.1)");
+      gradientH.append("stop").attr("offset", "100%").attr("stop-color", "rgba(85, 170, 0, 0)");
 
-      const gradientPC = defs.append("linearGradient").attr("id", "gradientPC").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.05)");
-      // gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
-      gradientPC.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(110, 135, 215, 0.25)");
-      gradientPC.append("stop").attr("offset", "90%").attr("stop-color", "rgba(110, 135, 215, 0)");
+      const gradientPC = defs.append("linearGradient").attr("id", "gradientPC");
+      gradientPC.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+      gradientPC.attr("gradientUnits", "objectBoundingBox");
+      gradientPC.append("stop").attr("offset", "37.58%").attr("stop-color", "rgba(110, 135, 215, 0.1)");
+      gradientPC.append("stop").attr("offset", "100%").attr("stop-color", "rgba(110, 135, 215, 0)");
 
-      const gradientPP = defs.append("linearGradient").attr("id", "gradientPP").attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%").attr("gradientUnits", "userSpaceOnUse");
-      // gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.05)");
-      // gradientPP.append("stop").attr("offset", "100%").attr("stop-color", "rgba(146, 91, 202, 0)");
-      gradientPP.append("stop").attr("offset", "63.93%").attr("stop-color", "rgba(146, 91, 202, 0.15)");
-      gradientPP.append("stop").attr("offset", "90%").attr("stop-color", "rgba(146, 91, 202, 0)");
+      const gradientPP = defs.append("linearGradient").attr("id", "gradientPP");
+      gradientPP.attr("x1", "0%").attr("y1", "0%").attr("x2", "0%").attr("y2", "100%");
+      gradientPP.attr("gradientUnits", "objectBoundingBox");
+      gradientPP.append("stop").attr("offset", "20.38%").attr("stop-color", "rgba(146, 91, 202, 0.25)");
+      gradientPP.append("stop").attr("offset", "88.54%").attr("stop-color", "rgba(146, 91, 202, 0)");
 
       //#endregion
 
@@ -632,35 +639,6 @@ export default {
         .attr("text-anchor", "middle")
         .attr("fill", this.colors.fontTip);
     },
-
-    makeTike(min, max) {
-      min = Decimal(min);
-      max = Decimal(max);
-
-      const makeFrandly = (num, isRoundUp) => {
-        const c1K = 1000,
-          c1M = 1000000;
-        let fixed;
-        if (isRoundUp) {
-          if (num.gt(c1M)) fixed = Decimal.ceil(Decimal.div(num, c1M)).times(c1M);
-          else if (num.gt(c1K)) fixed = Decimal.ceil(Decimal.div(num, c1K)).times(c1K);
-          else fixed = num;
-        } else {
-          if (num.gt(c1M)) fixed = Decimal.floor(Decimal.div(num, c1M)).times(c1M);
-          else if (num.gt(c1K)) fixed = Decimal.floor(Decimal.div(num, c1K)).times(c1K);
-          else fixed = num;
-        }
-
-        return fixed;
-      };
-
-      const fixedMin = makeFrandly(Decimal(min), false),
-        fixedMax = makeFrandly(Decimal(max), true);
-
-      const fixedMid1 = makeFrandly(min.add(max.sub(min).dividedBy(3)), false);
-      const fixedMid2 = makeFrandly(min.add(max.sub(min).dividedBy(3).mul(2)), false);
-      return [fixedMin, fixedMid1, fixedMid2, fixedMax];
-    },
   },
 
   watch: {
@@ -687,7 +665,6 @@ export default {
       //#region area
 
       this.initAreas();
-      // console.log(333, this.svgId);
       // left
       const leftArea = select(`#${this.svgId} #leftArea`);
       leftArea.selectAll("path").data([]).exit().remove();

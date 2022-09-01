@@ -1,3 +1,5 @@
+import { Decimal } from "decimal.js";
+
 export const randomRange = (min: number, max: number, isRound = false) => {
   var range = max - min;
   var rand = Math.random();
@@ -40,6 +42,21 @@ export function abridgeNumber(num: number, digits: number = 2) {
     }
   }
   return (num / si[i].value).toFixed(digits).replace(rx, "$1") + si[i].symbol;
+}
+
+/**
+ * 将 最小值/最大值 拆分n段，返回每段的刻度（包括端点）
+ * @param min 最小值
+ * @param max 最大值
+ */
+export function makeTicks(min: number, max: number, n: number) {
+  const step = (max - min) / n;
+  const result = [];
+  for (let i = 0; i <= n; i++) {
+    const value = min + step * i;
+    result.push(value);
+  }
+  return result;
 }
 
 /**
