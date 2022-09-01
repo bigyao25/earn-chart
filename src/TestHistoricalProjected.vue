@@ -1,7 +1,7 @@
 <template>
   <div class="body">
     <HistoricalProjectedChart :svgId="'test-hp-chart1'" :data="data1" :width="500" :height="400" :dark="dark" />
-    <HistoricalProjectedChart :svgId="'test-hp-chart2'" :data="data2" :width="378" :height="270" :dark="dark" />
+    <HistoricalProjectedChart :svgId="'test-hp-chart2'" :data="data2" :width="410" :height="300" :dark="dark" />
     <!-- <HistoricalProjectedChart :data="data" :width="1000" :height="600" /> -->
 
     <div class="right">

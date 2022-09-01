@@ -106,9 +106,9 @@ export default {
 
       const valueMin = Math.min(...allValues);
       const valueMax = Math.max(...allValues);
-      let yMin = valueMin - (valueMax - valueMin) / 3;
+      let yMin = valueMin - (valueMax - valueMin) / 10;
       yMin = yMin > 0 ? yMin : 0;
-      const yMax = valueMax + (valueMax - valueMin) / 3;
+      const yMax = valueMax + (valueMax - valueMin) / 10;
       this.yValueRange = { min: yMin, max: yMax };
       this.yScale = scaleLinear()
         .domain([yMin, yMax])
