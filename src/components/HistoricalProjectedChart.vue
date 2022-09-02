@@ -550,12 +550,12 @@ export default {
 
       tip
         .append("text")
-        .text(`$${abridgeNumber(valuePC)}`)
+        .text(`$${abridgeNumber(valuePP)}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 50)
         .attr("style", "font-family: Mulish Bold; font-size: 14px;")
         .attr("text-anchor", "middle")
-        .attr("class", "text-pc");
+        .attr("class", "text-pp");
 
       // Projected Rewards
       tip
@@ -569,12 +569,12 @@ export default {
 
       tip
         .append("text")
-        .text(`$${abridgeNumber(valuePP)}`)
+        .text(`$${abridgeNumber(valuePC)}`)
         .attr("dx", tipX + tipWidth / 2)
         .attr("dy", tipY + 85)
         .attr("style", "font-family: Mulish Bold; font-size: 14px;")
         .attr("text-anchor", "middle")
-        .attr("class", "text-pp");
+        .attr("class", "text-pc");
     },
 
     drawTip1(root, date, value) {
