@@ -31,10 +31,12 @@ export default {
       strokeWidth: 5,
     };
   },
-  created() {
+  created() {},
+  mounted() {
+    console.log("mounted");
     this.init();
+    this.change();
   },
-  mounted() {},
   methods: {
     init() {
       const svg = select(`#${this.svgId}`);
@@ -48,30 +50,49 @@ export default {
       for (let i = 0; i < this.data?.ranges.length; i++) {
         const range = this.data?.ranges[i];
 
-        const dashoffset = this.circumference * range.range.min + this.circumference / 365;
-        let dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - (this.circumference / 365) * 2;
         let linecap;
         if (range.color === this.data.defaultColor) {
-          dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - this.circumference / 365;
           linecap = "none";
         } else {
-          dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - (this.circumference / 365) * 2;
           linecap = "round";
         }
 
         svg
           .append("circle")
+          .attr("id", `bar-range-${i}`)
           .attr("class", "bar-range")
           .attr("cx", this.width / 2)
           .attr("cy", this.height / 2)
           .attr("r", this.radius)
           .attr("transform", `rotate(-90, ${this.width / 2}, ${this.height / 2})`)
           .attr("fill", "none")
-          .attr("stroke", range.color)
+          .attr("stroke", this.data.defaultColor)
           .attr("stroke-width", this.strokeWidth)
+          .attr("stroke-linecap", linecap)
+          // .attr("style", `transition-delay: ${i}s`)
+          .attr("transition-delay", `${i}s`);
+      }
+    },
+    change() {
+      console.log("change");
+      if (this.data?.ranges.length === 0) return;
+      for (let i = 0; i < this.data?.ranges.length; i++) {
+        const range = this.data?.ranges[i];
+
+        const dashoffset = this.circumference * range.range.min + this.circumference / 365;
+        let dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - (this.circumference / 365) * 2;
+        if (range.color === this.data.defaultColor) {
+          dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - this.circumference / 365;
+        } else {
+          dashlength = this.circumference * (range.range.max - range.range.min) - this.strokeWidth - (this.circumference / 365) * 2;
+        }
+
+        const svg = select(`#${this.svgId}`);
+        svg
+          .select(`#bar-range-${i}`)
+          .attr("stroke", range.color)
           .attr("stroke-dasharray", `${dashlength} ${this.circumference}`)
-          .attr("stroke-dashoffset", dashoffset * -1)
-          .attr("stroke-linecap", linecap);
+          .attr("stroke-dashoffset", dashoffset * -1);
       }
     },
   },
@@ -85,10 +106,19 @@ export default {
   },
   watch: {
     data() {
+      console.log("watch:data");
       this.init();
+      this.$forceUpdate();
+      // this.$nextTick(() => {
+      //   this.change();
+      // });
+      setTimeout(() => {
+        this.change();
+      }, 1000);
+      // this.change();
     },
     dark() {
-      this.init();
+      this.change();
     },
   },
 };
@@ -112,7 +142,14 @@ export default {
     }
   }
   .bar-range {
-    transition: stroke-dasharray 1s ease;
+    // transition: stroke-dasharray 1s ease;
+    transition-duration: 3s;
+    /*     以下三值为默认值，稍后会详细介绍 */
+    transition-property: stroke-dashoffset;
+    transition-timing-function: ease;
+
+    // transition: stroke-dashoffset 1s ease;
+    // transition: all 1s ease;
   }
 }
 </style>
