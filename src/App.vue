@@ -10,6 +10,10 @@
       <TestInvest></TestInvest>
     </div>
     <div class="card bg-yellow"><TestMechanismRing></TestMechanismRing></div>
+    <div class="card bg-yellow"><TestMechanismRing2></TestMechanismRing2></div>
+    <div class="card bg-red">
+      <TestMyRingChart></TestMyRingChart>
+    </div>
     <div class="card bg-gray">
       <Test1></Test1>
     </div>
@@ -21,7 +25,9 @@ import dayjs from "dayjs";
 import TestHistoricalProjected from "./TestHistoricalProjected.vue";
 import TestMechanism from "./TestMechanism.vue";
 import TestMechanismRing from "./TestMechanismRing.vue";
+import TestMechanismRing2 from "./TestMechanismRing2.vue";
 import TestInvest from "./TestInvest.vue";
+import TestMyRingChart from "./TestMyRingChart.vue";
 import Test1 from "./components/Test1.vue";
 
 export default {
@@ -33,7 +39,7 @@ export default {
     console.log(a ?? 1);
   },
   methods: {},
-  components: { TestHistoricalProjected, TestMechanism, TestMechanismRing, TestInvest, Test1 },
+  components: { TestHistoricalProjected, TestMechanism, TestMechanismRing, TestMechanismRing2, TestInvest, TestMyRingChart, Test1 },
 };
 </script>
 

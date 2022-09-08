@@ -42,7 +42,7 @@ export default {
       this.fillData();
 
       const svg = select(`#${this.svgId}`);
-      console.log(svg);
+      // console.log(svg);
       svg.classed("dark", this.dark);
 
       svg.selectAll("*").remove();
