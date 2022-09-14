@@ -7,7 +7,7 @@
           Tiered APY
           <span>(min, max]</span>
         </h2>
-        <div class="tier" v-for="(tier, i) in tieredApys">
+        <div class="tier" v-for="(tier, i) in tieredApys" :key="i">
           Tier #{{ i + 1 }} min.
           <input type="text" v-model="tier.tier.min" />
           max.
