@@ -23,9 +23,11 @@ jobs:
           persist-credentials: false
 
       # 执行npm脚本打包项目
-      - name: Install and Build
+      - name: Install
         run: |
           npm install
+      - name: Build
+        run: |
           npm run build
 
       # 执行JamesIves/github-pages-deploy-action将项目发布到Github Pages
