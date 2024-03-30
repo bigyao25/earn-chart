@@ -8,8 +8,6 @@ server:
     from_secret: host105
   user:
     from_secret: user
-  ssh_key:
-    from_secret: ssh_key
 
 clone:
   disable: true
