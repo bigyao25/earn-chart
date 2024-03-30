@@ -1,4 +1,4 @@
-import { getRewardOneDay, getInvestByApy } from "../utils/utils";
+import { getRewardOneDay, getInvestByApy } from "./utils";
 
 test("getRewardOneDay: 0", () => {
   const reward = getRewardOneDay(10000, [{ tier: { min: 0, max: 999999 }, apy: 0.1 }]);

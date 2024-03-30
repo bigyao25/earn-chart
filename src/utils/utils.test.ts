@@ -1,5 +1,5 @@
 // const { abridgeNumber } = require("../utils/utils");
-import { abridgeNumber, makeTicks } from "../utils/utils";
+import { abridgeNumber, makeTicks } from "./utils";
 
 test("abridgeNumber: 0", () => {
   expect(abridgeNumber(0)).toBe("0");
