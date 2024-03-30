@@ -11,8 +11,15 @@ server:
   ssh_key:
     from_secret: ssh_key
 
+clone:
+  disable: true
+
 steps:
   - name: greeting
     commands:
       - echo hello world
       - echo hostname
+
+trigger:
+  branch:
+    - test105
