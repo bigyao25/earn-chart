@@ -1,24 +1,21 @@
 ---
 kind: pipeline
-type: ssh
 name: default
 
-server:
-  host:
-    from_secret: host105
-  user:
-    from_secret: user
-  ssh_key:
-    from_secret: ssh_key
-
-clone:
-  disable: true
-
 steps:
-  - name: greeting
-    commands:
-      - echo hello world
-      - echo hostname
+  - name: ssh
+    image: appleboy/drone-ssh
+    settings:
+      host:
+        frome_secret: host
+      username:
+        frome_secret: user
+      key:
+        frome_secret: ssh_key
+      command_timeout: 10s
+      script:
+        - echo hello world
+        - echo hostname
 
 trigger:
   branch:
