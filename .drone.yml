@@ -15,7 +15,7 @@ steps:
       command_timeout: 10s
       script:
         - echo hello world
-        - echo hostname
+        - echo $(hostname)
 
 trigger:
   branch:
