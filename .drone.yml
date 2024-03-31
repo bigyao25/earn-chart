@@ -7,11 +7,11 @@ steps:
     image: appleboy/drone-ssh
     settings:
       host:
-        frome_secret: host
+        from_secret: host
       username:
-        frome_secret: user
+        from_secret: user
       key:
-        frome_secret: ssh_key
+        from_secret: ssh_key
       command_timeout: 10s
       script:
         - echo hello world
