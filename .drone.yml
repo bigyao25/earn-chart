@@ -17,8 +17,7 @@ clone:
 steps:
   - name: greeting
     commands:
-      - echo hello world
-      - echo $(hostname)
+      - echo "hello from "$(hostname)
 
 trigger:
   branch:
