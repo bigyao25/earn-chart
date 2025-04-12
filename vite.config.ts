@@ -5,4 +5,7 @@ import vue from "@vitejs/plugin-vue";
 export default defineConfig({
   //   base: "/earn-chart/",
   plugins: [vue()],
+  server: {
+    port: 3000,
+  },
 });
