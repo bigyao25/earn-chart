@@ -81,7 +81,7 @@ export default {
       for (let i = 1; i <= 5; i++) {
         this[`rate${i}`] = Math.random();
       }
-    }, 5000);
+    }, 2000);
   },
   beforeDestroy() {
     if (this.Timer) {
